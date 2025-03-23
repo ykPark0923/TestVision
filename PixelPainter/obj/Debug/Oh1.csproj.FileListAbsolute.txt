@@ -1,0 +1,10 @@
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\bin\Debug\Oh1.exe.config
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\bin\Debug\Oh1.exe
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\bin\Debug\Oh1.pdb
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\obj\Debug\Oh1.csproj.AssemblyReference.cache
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\obj\Debug\Oh1.Form1.resources
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\obj\Debug\Oh1.Properties.Resources.resources
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\obj\Debug\Oh1.csproj.GenerateResource.cache
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\obj\Debug\Oh1.csproj.CoreCompileInputs.cache
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\obj\Debug\Oh1.exe
+C:\Users\ajisj\OneDrive\문서\Visual Studio 2022\Oh1\Oh1\obj\Debug\Oh1.pdb
