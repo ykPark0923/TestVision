@@ -60,13 +60,14 @@ namespace PixelPainter
             Mat image = new Mat();
             Mat dst = src.Clone(); // 원본 이미지 복사하여 출력용으로 사용
 
-            Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3));
+            Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(2, 2));
             Point[][] contours;
 
             // 1. 그레이스케일 변환
             Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
 
-            // 2. 이진화 (PCB의 밝은 영역 강조)
+            //2. 이진화 (PCB의 밝은 영역 강조)
+            //Cv2.AdaptiveThreshold(gray, binary, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.Binary, 3, 1);
             Cv2.Threshold(gray, binary, 50, 255, ThresholdTypes.Binary);
 
             // 3. 모폴로지 연산 (잡음 제거 및 선명한 윤곽 생성)
@@ -93,11 +94,8 @@ namespace PixelPainter
                 // 4️윤곽선을 이미지에 그림
                 Cv2.DrawContours(dst, new Point[][] { approx }, -1, new Scalar(255, 0, 0), 2, LineTypes.AntiAlias);
 
-                // 6️이미지 표시
-                //Cv2.ImShow("dst", dst);
 
                 pictureBox1.Image = BitmapConverter.ToBitmap(dst);
-
 
                 if (perimeter > 2148 || perimeter < 2091)
                 {
