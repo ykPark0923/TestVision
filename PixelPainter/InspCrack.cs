@@ -29,11 +29,6 @@ namespace PixelPainter
 
         private void button1_Click(object sender, EventArgs e)
         {
-            AlignAndCompare();
-        }
-
-        private void AlignAndCompare()
-        {
             if (src.Empty())
             {
                 Console.WriteLine("이미지를 로드하세요");
@@ -51,7 +46,6 @@ namespace PixelPainter
             }
         }
 
-        // 크랙 감지 함수
         private bool IsPCBCracked(Mat src)
         {
             Mat gray = new Mat();
