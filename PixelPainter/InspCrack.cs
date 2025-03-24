@@ -26,8 +26,8 @@ namespace PixelPainter
         private Mat src = new Mat();
         private Mat src2 = new Mat();
         private Mat temp = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
-        private Mat aligned1 = new Mat();
-        private Mat aligned2 = new Mat();
+        private Mat aligned1 = null;
+        private Mat aligned2 = null;
         private Mat diffImage = new Mat();
 
         private void openBTN_Click(object sender, EventArgs e)
@@ -39,6 +39,46 @@ namespace PixelPainter
             }
         }        
         //크랙이미지 윤곽선 그리기
+        private void diffBTN_Click(object sender, EventArgs e)
+        {
+            AlignAndCompare();
+        }
+        private void AlignAndCompare()
+        {
+            if (src.Empty() || src2.Empty())
+            {
+                Console.WriteLine("이미지를 먼저 로드하세요.");
+                return;
+            }
+
+            // Crack 불량 판단
+            if ((IsCrackByContour(src) || IsCrackByEdge(src)) || aligned1 == null)
+            {
+
+                IsPCBCracked(src);
+                textBox1.Text = "NG: Crack";
+                return;
+            }
+
+            //src2 윤곽선 그리기전 이미지 임시저장
+            temp = src2.Clone();
+
+            // PCB 정렬
+            aligned1 = AlignPCB(src);
+            aligned2 = AlignPCB(src2);
+            src2 = temp.Clone();
+
+            pictureBox1.Image = BitmapConverter.ToBitmap(aligned1);
+            pictureBox2.Image = BitmapConverter.ToBitmap(aligned2);
+
+            // 이미지 비교 (절대차)
+            diffImage = new Mat();
+            Cv2.Absdiff(aligned1, aligned2, diffImage);
+            Cv2.ImShow("Difference", diffImage);
+            textBox1.Text = "OK";
+        }
+        
+        // 외곽선 둘레 정상이미지 둘레와 비교
         private void IsPCBCracked(Mat src)
         {
             Mat gray = new Mat();
@@ -83,43 +123,8 @@ namespace PixelPainter
                 pictureBox1.Image = BitmapConverter.ToBitmap(dst);
             }
         }
-        private void diffBTN_Click(object sender, EventArgs e)
-        {
-            AlignAndCompare();
-        }
-        private void AlignAndCompare()
-        {
-            if (src.Empty() || src2.Empty())
-            {
-                Console.WriteLine("이미지를 먼저 로드하세요.");
-                return;
-            }
 
-            //src2 윤곽선 그리기전 이미지 임시저장
-            temp = src2.Clone();
-
-            // PCB 정렬
-            aligned1 = AlignPCB(src);
-            aligned2 = AlignPCB(src2);
-            src2 = temp.Clone();
-
-            // Crack 불량 판단
-            if (IsCrackByEdge(src) || aligned1 == null)
-            {
-                IsPCBCracked(src);
-                textBox1.Text = "NG: Crack";
-                return;
-            }
-
-            pictureBox1.Image = BitmapConverter.ToBitmap(aligned1);
-            pictureBox2.Image = BitmapConverter.ToBitmap(aligned2);
-
-            // 이미지 비교 (절대차)
-            diffImage = new Mat();
-            Cv2.Absdiff(aligned1, aligned2, diffImage);
-            Cv2.ImShow("Difference", diffImage);
-            textBox1.Text = "OK";
-        }
+        //수평, 수직 2개 직선보다 적으면 크랙
         private bool IsCrackByEdge(Mat src)
         {
             Mat gray = new Mat();
@@ -156,6 +161,36 @@ namespace PixelPainter
 
             // 수평 2개 + 수직 2개 이상이어야 정상
             return (horizontal < 2 || vertical < 2); // 부족하면 Crack
+        }
+
+        //꼭짓점 4개 아니면 크랙
+        private bool IsCrackByContour(Mat src)
+        {
+            Mat gray = new Mat();
+            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            Cv2.GaussianBlur(gray, gray, new Size(5, 5), 1.5);
+
+            Mat binary = new Mat();
+            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+
+            // 윤곽선 검출
+            Point[][] contours;
+            HierarchyIndex[] hierarchy;
+            Cv2.FindContours(binary, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+            if (contours.Length == 0) return true; // 윤곽 없으면 crack
+
+            var largest = contours.OrderByDescending(c => Cv2.ContourArea(c)).First();
+            double arcLen = Cv2.ArcLength(largest, true);
+            Point[] approx = Cv2.ApproxPolyDP(largest, 0.02 * arcLen, true);
+
+            // 디버깅용 윤곽선 보기
+            Mat debug = src.Clone();
+            Cv2.DrawContours(debug, new[] { approx }, -1, Scalar.Red, 2);
+            Cv2.ImShow("Contour", debug);
+
+            // 핵심 판단: 꼭짓점 4개면 정상, 아니면 crack
+            return approx.Length != 4;
         }
         private Mat AlignPCB(Mat src)
         {
@@ -217,5 +252,6 @@ namespace PixelPainter
 
             return ordered;
         }
+
     }
 }
