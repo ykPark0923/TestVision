@@ -1,6 +1,6 @@
 ﻿namespace PixelPainter
 {
-    partial class editIMG
+    partial class InspCrack
     {
         /// <summary>
         /// Required designer variable.

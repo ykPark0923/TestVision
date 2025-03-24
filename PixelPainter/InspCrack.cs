@@ -6,9 +6,9 @@ using OpenCvSharp.Extensions;
 
 namespace PixelPainter
 {
-    public partial class editIMG : Form
+    public partial class InspCrack : Form
     {
-        public editIMG()
+        public InspCrack()
         {
             InitializeComponent();
         }
