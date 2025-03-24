@@ -138,6 +138,8 @@ namespace PixelPainter
 
             LineSegmentPoint[] lines = Cv2.HoughLinesP(edge, 0.5, Math.PI / 180, 80, 100, 10);
 
+            //Console.WriteLine("line"+lines.Length);
+
 
             // 방향별로 필터링
             int horizontal = 0;
@@ -158,6 +160,9 @@ namespace PixelPainter
                 else if (Math.Abs(angle - 90) < 10 || Math.Abs(angle + 90) < 10)
                     vertical++;
             }
+
+            //Console.WriteLine("horizontal" + horizontal);
+            //Console.WriteLine("vertical" + vertical);
 
             // 수평 2개 + 수직 2개 이상이어야 정상
             return (horizontal < 2 || vertical < 2); // 부족하면 Crack
