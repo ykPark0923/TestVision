@@ -99,22 +99,22 @@ namespace PixelPainter
                 //Console.WriteLine("Largest Contour Perimeter : " + perimeter);
 
                 // 3️윤곽선 단순화
-                Point[] approx = Cv2.ApproxPolyDP(largestContour, epsilon, true);
-
-                // 4️윤곽선을 이미지에 그림
-                Cv2.DrawContours(dst, new Point[][] { approx }, -1, new Scalar(255, 0, 0), 2, LineTypes.AntiAlias);
-
-
-                pictureBox1.Image = BitmapConverter.ToBitmap(dst);
+                Point[] approx = Cv2.ApproxPolyDP(largestContour, epsilon, true);               
 
                 if (perimeter <= 2150 && perimeter >= 2090)
                 {
                     _IsCracked = false;  //크랙없음
+                    // 4️윤곽선을 이미지에 그림
+                    Cv2.DrawContours(dst, new Point[][] { approx }, -1, new Scalar(255, 0, 0), 2, LineTypes.AntiAlias);
                 }
                 else
                 {
                     _IsCracked = true;  //크랙있음
+                    // 4️윤곽선을 이미지에 그림
+                    Cv2.DrawContours(dst, new Point[][] { approx }, -1, new Scalar(0, 0, 255), 2, LineTypes.AntiAlias);
                 }
+
+                pictureBox1.Image = BitmapConverter.ToBitmap(dst);
             }
             return _IsCracked;
         }
