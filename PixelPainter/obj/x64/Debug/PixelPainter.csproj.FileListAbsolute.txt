@@ -23,7 +23,6 @@ C:\devYK\TestVision\PixelPainter\bin\x64\Debug\System.Numerics.Vectors.xml
 C:\devYK\TestVision\PixelPainter\bin\x64\Debug\System.Runtime.CompilerServices.Unsafe.xml
 C:\devYK\TestVision\PixelPainter\bin\x64\Debug\System.ValueTuple.xml
 C:\devYK\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.csproj.AssemblyReference.cache
-C:\devYK\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.editIMG.resources
 C:\devYK\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.Form1.resources
 C:\devYK\TestVision\PixelPainter\obj\x64\Debug\Oh1.Properties.Resources.resources
 C:\devYK\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.csproj.GenerateResource.cache
@@ -31,3 +30,4 @@ C:\devYK\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.csproj.CoreCompileIn
 C:\devYK\TestVision\PixelPainter\obj\x64\Debug\PixelPai.F2372F17.Up2Date
 C:\devYK\TestVision\PixelPainter\obj\x64\Debug\Oh1.exe
 C:\devYK\TestVision\PixelPainter\obj\x64\Debug\Oh1.pdb
+C:\devYK\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.InspCrack.resources
