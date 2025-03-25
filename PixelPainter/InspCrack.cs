@@ -78,7 +78,7 @@ namespace PixelPainter
             // 이미지 비교 (절대차)
             diffImage = new Mat();
             Cv2.Absdiff(aligned1, aligned2, diffImage);
-            Cv2.ImShow("Difference", diffImage);
+            //Cv2.ImShow("Difference", diffImage);
             textBox1.Text = "OK";
         }        
 
@@ -139,7 +139,7 @@ namespace PixelPainter
 
             Mat edge = new Mat();
             Cv2.Canny(gray, edge, 100, 200);
-            Cv2.ImShow("edge", edge);
+            //Cv2.ImShow("edge", edge);
 
             LineSegmentPoint[] lines = Cv2.HoughLinesP(edge, 0.5, Math.PI / 180, 80, 100, 10);
 
@@ -181,7 +181,7 @@ namespace PixelPainter
 
             Mat binary = new Mat();
             Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Triangle);
-            Cv2.ImShow("binary", binary);
+            //Cv2.ImShow("binary", binary);
 
             // 윤곽선 검출
             Point[][] contours;
@@ -195,9 +195,9 @@ namespace PixelPainter
             Point[] approx = Cv2.ApproxPolyDP(largest, 0.02 * arcLen, true);
 
             // 디버깅용 윤곽선 보기
-            Mat debug = src.Clone();
-            Cv2.DrawContours(debug, new[] { approx }, -1, Scalar.Red, 2);
-            Cv2.ImShow("Contour", debug);
+            //Mat debug = src.Clone();
+            //Cv2.DrawContours(debug, new[] { approx }, -1, Scalar.Red, 2);
+            //Cv2.ImShow("Contour", debug);
 
             // 핵심 판단: 꼭짓점 4개면 정상, 아니면 crack
             return approx.Length != 4;
@@ -264,6 +264,5 @@ namespace PixelPainter
 
             return ordered;
         }
-
     }
 }
