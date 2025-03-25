@@ -80,14 +80,14 @@ namespace PixelPainter
             Cv2.Threshold(grayDiff, binaryDiff, 50, 255, ThresholdTypes.Binary);
 
             // 윤곽선 검출
-            Point[][] contours;
+            Point[][] CrackContours;
             HierarchyIndex[] hierarchy;
-            Cv2.FindContours(binaryDiff, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+            Cv2.FindContours(binaryDiff, out CrackContours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
             bool crackDetected = false;
             Mat resultImage = src.Clone();
 
-            foreach (var contour in contours)
+            foreach (var contour in CrackContours)
             {
                 double area = Cv2.ContourArea(contour);
                 if (area > 5)  // 일정 크기 이상만 감지
