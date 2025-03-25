@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
 using System.Windows.Forms;
@@ -106,23 +107,18 @@ namespace PixelPainter
 
 
 
-
-
-
-
         private void alignBTN_Click(object sender, EventArgs e)
-        {            
+        {
             Mat temp1 = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
             Mat temp2 = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
             Mat aligned1 = null;
             Mat aligned2 = null;
 
-            if(src.Empty() || src2.Empty())
+            if (src.Empty() || src2.Empty())
             {
                 Console.WriteLine("이미지를 먼저 로드하세요.");
                 return;
             }
-
 
             //이미지 윤곽선 그리기전 이미지 임시저장
             temp1 = src.Clone();
@@ -132,96 +128,104 @@ namespace PixelPainter
             aligned1 = AlignPCB(src, src2);
             aligned2 = AlignPCB(src2, src2);
 
-            Cv2.ImShow("align1", aligned1);
-            Cv2.ImShow("align2", aligned2);
-            src = temp1.Clone();
-            src2 = temp2.Clone();
+            if(aligned1 != null && aligned2 != null)
+            {
+                Cv2.ImShow("align1", aligned1);
+                Cv2.ImShow("align2", aligned2);
+                src = temp1.Clone();
+                src2 = temp2.Clone();
+            }
+            else
+            {
+                Console.WriteLine("align 미검.");
+            }
 
         }
 
         private Mat AlignPCB(Mat src, Mat src2)
         {
-            Mat gray = new Mat();
-            Mat binary = new Mat();
+            Mat gray = new Mat(); // 원본 손상 방지를 위해 새로운 Mat 사용
             Mat result = new Mat();
 
-            // src 이미지를 회색조로 변환
-            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY); // 원본을 먼저 Grayscale로 변환
 
-            // Adaptive Thresholding 적용
-            Cv2.AdaptiveThreshold(gray, binary, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.BinaryInv, 11, 2);
+            #region 좌우상하 원검출위해 안쪽영역 지움
+            //crack은 외곽에만 생김, 내부영역 지워버림
+            int roiWidth = src.Cols * 75 / 100;   // 전체 너비의 75%
+            int roiHeight = src.Rows * 100 / 100; // 전체 높이의 100%
 
-            // 외곽선 찾기
-            Point[][] contours;
-            HierarchyIndex[] hierarchy;
-            Cv2.FindContours(binary, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+            int x = (src.Cols - roiWidth) / 2;
+            int y = (src.Rows - roiHeight) / 2;
 
-            // 가장 큰 외곽선 찾기
-            Point[] largestContour = contours.OrderByDescending(c => Cv2.ContourArea(c)).FirstOrDefault();
-            if (largestContour == null || Cv2.ContourArea(largestContour) < 100)
-                return src;
+            Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
+            Cv2.Rectangle(gray, innerROI, new Scalar(0), -1);
 
-            // 외곽선을 근사화하여 4개의 점을 추출
-            Point[] approx = Cv2.ApproxPolyDP(largestContour, 0.02 * Cv2.ArcLength(largestContour, true), true);
+            roiWidth = src.Cols * 100 / 100;
+            roiHeight = src.Rows * 70 / 100;
+            x = (src.Cols - roiWidth) / 2;
+            y = (src.Rows - roiHeight) / 2;
+            innerROI = new Rect(x, y, roiWidth, roiHeight);
+            Cv2.Rectangle(gray, innerROI, new Scalar(0), -1);
+            #endregion
 
-            // 4개의 점을 얻으면
-            if (approx.Length == 4)
+            // 블러링 (노이즈 감소)
+            Cv2.GaussianBlur(gray, gray, new Size(5, 5), 2);
+
+            // 원 검출
+            CircleSegment[] circles = Cv2.HoughCircles(gray, HoughModes.Gradient, 1, gray.Rows / 8, 50, 20, 5, 50);
+
+
+
+            // 원 검출 실패 시 종료
+            if (circles.Length < 4)
             {
-                // 4개의 점을 시계방향으로 정렬
-                Point2f[] srcPoints = OrderPoints(approx);
-
-
-                // 4개의 점을 이미지에 그리기
-                for (int i = 0; i < 4; i++)
-                {
-                    // 각 점을 빨간색 원으로 표시
-                    Cv2.Circle(src, new Point((int)srcPoints[i].X, (int)srcPoints[i].Y), 10, new Scalar(0, 0, 255), -1);  // -1은 채우기
-                }
-
-                // 기준 이미지는 src2로 설정
-                Point2f[] dstPoints =
-                {
-                    new Point2f(0, 0),  // 왼쪽 위
-                    new Point2f(src2.Cols - 1, 0),  // 오른쪽 위
-                    new Point2f(src2.Cols - 1, src2.Rows - 1),  // 오른쪽 아래
-                    new Point2f(0, src2.Rows - 1)  // 왼쪽 아래
-                };
-
-
-
-                // 아핀 변환 행렬 계산
-                //Mat affineMatrix = Cv2.GetAffineTransform(srcPoints, dstPoints);
-                // src 이미지를 src2에 맞춰 아핀 변환 적용
-                //Cv2.WarpAffine(src, result, affineMatrix, src2.Size());
-
-
-                // Perspective 변환 행렬 계산
-                Mat perspectiveMatrix = Cv2.GetPerspectiveTransform(srcPoints, dstPoints);
-                Cv2.WarpPerspective(src, result, perspectiveMatrix, src2.Size());
-
-
-                return result;
-            }
-            else
-            {
-                // 4개 점이 아닌 경우 null 반환
+                Console.WriteLine("Error: 원이 4개 검출안됨!");
                 return null;
             }
+
+            // 원 중심점을 저장하고 정렬
+            List<Point2f> centers = new List<Point2f>();
+            foreach (var circle in circles)
+            {
+                centers.Add(new Point2f((float)circle.Center.X, (float)circle.Center.Y));
+            }
+            Point2f[] sortedCenters = SortCenters(centers);
+
+            // 패딩 값 설정 (픽셀 단위, 필요에 따라 조정 가능)
+            int paddingX = 30; // 좌우 여유 공간
+            int paddingY = 30; // 상하 여유 공간
+
+            // 패딩을 적용한 목적지 좌표 계산 (네 방향 모두 여유 공간 추가)
+            Point2f[] dstPoints =
+            {
+                new Point2f(0 + paddingX, 0 + paddingY),  // 좌상단 (더 오른쪽, 아래쪽)
+                new Point2f(src2.Cols - 1 - paddingX, 0 + paddingY),  // 우상단 (더 왼쪽, 아래쪽)
+                new Point2f(src2.Cols - 1 - paddingX, src2.Rows - 1 - paddingY),  // 우하단 (더 왼쪽, 위쪽)
+                new Point2f(0 + paddingX, src2.Rows - 1 - paddingY)   // 좌하단 (더 오른쪽, 위쪽)
+            };
+
+            // Perspective 변환 적용
+            Mat perspectiveMatrix = Cv2.GetPerspectiveTransform(sortedCenters, dstPoints);
+            Cv2.WarpPerspective(src, result, perspectiveMatrix, new Size(src2.Cols, src2.Rows));
+
+            return result;
         }
 
-        private Point2f[] OrderPoints(Point[] points)
+
+        // 원 중심점을 좌상단, 우상단, 우하단, 좌하단 순으로 정렬
+        private Point2f[] SortCenters(List<Point2f> centers)
         {
-            Point2f[] ordered = new Point2f[4];
-            var sortedX = points.OrderBy(p => p.X).ToArray();
+            var sortedX = centers.OrderBy(p => p.X).ToArray();
             var left = sortedX.Take(2).OrderBy(p => p.Y).ToArray();
             var right = sortedX.Skip(2).OrderBy(p => p.Y).ToArray();
 
-            ordered[0] = left[0];  // 왼쪽 위
-            ordered[1] = right[0];  // 오른쪽 위
-            ordered[2] = right[1];  // 오른쪽 아래
-            ordered[3] = left[1];  // 왼쪽 아래
-
-            return ordered;
+            return new Point2f[]
+            {
+                left[0],   // 좌상단
+                right[0],  // 우상단
+                right[1],  // 우하단
+                left[1]    // 좌하단
+            };
         }
     }
 }
