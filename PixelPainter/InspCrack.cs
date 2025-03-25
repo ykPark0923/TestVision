@@ -25,7 +25,8 @@ namespace PixelPainter
 
         private Mat src = new Mat();
         private Mat src2 = new Mat();
-        private Mat temp = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
+        private Mat temp1 = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
+        private Mat temp2 = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
         private Mat aligned1 = null;
         private Mat aligned2 = null;
         private Mat diffImage = new Mat();
@@ -51,22 +52,25 @@ namespace PixelPainter
                 return;
             }
 
-            // Crack 불량 판단
-            if ((IsCrackByContour(src) || IsCrackByEdge(src)) || aligned1 == null)
-            {
 
-                IsPCBCracked(src);
-                textBox1.Text = "NG: Crack";
-                return;
-            }
-
-            //src2 윤곽선 그리기전 이미지 임시저장
-            temp = src2.Clone();
+            //이미지 윤곽선 그리기전 이미지 임시저장
+            temp1 = src.Clone();
+            temp2 = src2.Clone();
 
             // PCB 정렬
             aligned1 = AlignPCB(src);
             aligned2 = AlignPCB(src2);
-            src2 = temp.Clone();
+            src = temp1.Clone();
+            src2 = temp2.Clone();
+
+
+            // Crack 불량 판단
+            if ((IsCrackByContour(src) || IsCrackByEdge(src)) || aligned1 == null)
+            {
+                IsPCBCracked(src);
+                textBox1.Text = "NG: Crack";
+                return;
+            }
 
             pictureBox1.Image = BitmapConverter.ToBitmap(aligned1);
             pictureBox2.Image = BitmapConverter.ToBitmap(aligned2);
@@ -76,8 +80,8 @@ namespace PixelPainter
             Cv2.Absdiff(aligned1, aligned2, diffImage);
             Cv2.ImShow("Difference", diffImage);
             textBox1.Text = "OK";
-        }
-        
+        }        
+
         // 외곽선 둘레 정상이미지 둘레와 비교
         private void IsPCBCracked(Mat src)
         {
@@ -96,6 +100,7 @@ namespace PixelPainter
             //2. 이진화 (PCB의 밝은 영역 강조)
             //Cv2.AdaptiveThreshold(gray, binary, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.Binary, 3, 1);
             Cv2.Threshold(gray, binary, 50, 255, ThresholdTypes.Binary);
+            //Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Triangle);
 
             // 3. 모폴로지 연산 (잡음 제거 및 선명한 윤곽 생성)
             Cv2.MorphologyEx(binary, morp, MorphTypes.Close, Kernel, new Point(-1, -1), 2);
@@ -140,7 +145,6 @@ namespace PixelPainter
 
             //Console.WriteLine("line"+lines.Length);
 
-
             // 방향별로 필터링
             int horizontal = 0;
             int vertical = 0;
@@ -176,7 +180,8 @@ namespace PixelPainter
             Cv2.GaussianBlur(gray, gray, new Size(5, 5), 1.5);
 
             Mat binary = new Mat();
-            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Triangle);
+            Cv2.ImShow("binary", binary);
 
             // 윤곽선 검출
             Point[][] contours;
@@ -204,6 +209,8 @@ namespace PixelPainter
             Mat result = new Mat();
 
             Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+
+            //Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Triangle);
             Cv2.AdaptiveThreshold(gray, binary, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.BinaryInv, 11, 2);
 
             Point[][] contours;
