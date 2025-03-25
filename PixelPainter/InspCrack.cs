@@ -49,10 +49,38 @@ namespace PixelPainter
                 return;
             }
 
-            diffImage = new Mat();
-            Cv2.Absdiff(src, src2, diffImage);
 
-            detectCrack();
+            //이미지 윤곽선 그리기전 이미지 임시저장
+            Mat temp1 = src.Clone();
+            Mat temp2 = src2.Clone();
+
+            // PCB 정렬
+            Mat aligned1 = AlignPCB(src, src2);
+            Mat aligned2 = AlignPCB(src2, src2);
+
+            if (aligned1 != null && aligned2 != null)
+            {
+                src = temp1.Clone();
+                src2 = temp2.Clone();
+            }
+            else
+            {
+                Console.WriteLine("align 미검.");
+            }
+
+
+
+            diffImage = new Mat();
+            Cv2.Absdiff(aligned1, aligned2, diffImage);
+
+            //Cv2.CvtColor(diffImage, diffImage, ColorConversionCodes.BGR2GRAY);
+            //Cv2.Threshold(diffImage, diffImage, 170, 255, ThresholdTypes.Binary);
+            //Cv2.GaussianBlur(diffImage, diffImage, new Size(3, 3), 2, 2);
+
+
+            Cv2.ImShow("diffImage", diffImage);
+
+            //detectCrack();
         }
         private void detectCrack()
         {
@@ -104,9 +132,6 @@ namespace PixelPainter
             // 크랙이 감지되었다면 NG 처리
             textBox1.Text = crackDetected ? "NG: Crack" : "OK";
         }
-
-
-
         private void alignBTN_Click(object sender, EventArgs e)
         {
             Mat temp1 = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
@@ -141,7 +166,6 @@ namespace PixelPainter
             }
 
         }
-
         private Mat AlignPCB(Mat src, Mat src2)
         {
             Mat gray = new Mat(); // 원본 손상 방지를 위해 새로운 Mat 사용
@@ -151,7 +175,7 @@ namespace PixelPainter
 
             #region 좌우상하 원검출위해 안쪽영역 지움
             //crack은 외곽에만 생김, 내부영역 지워버림
-            int roiWidth = src.Cols * 75 / 100;   // 전체 너비의 75%
+            int roiWidth = src.Cols * 78 / 100;   // 전체 너비의 75%
             int roiHeight = src.Rows * 100 / 100; // 전체 높이의 100%
 
             int x = (src.Cols - roiWidth) / 2;
@@ -161,7 +185,7 @@ namespace PixelPainter
             Cv2.Rectangle(gray, innerROI, new Scalar(0), -1);
 
             roiWidth = src.Cols * 100 / 100;
-            roiHeight = src.Rows * 70 / 100;
+            roiHeight = src.Rows * 73 / 100;
             x = (src.Cols - roiWidth) / 2;
             y = (src.Rows - roiHeight) / 2;
             innerROI = new Rect(x, y, roiWidth, roiHeight);
@@ -175,6 +199,23 @@ namespace PixelPainter
             CircleSegment[] circles = Cv2.HoughCircles(gray, HoughModes.Gradient, 1, gray.Rows / 8, 50, 20, 5, 50);
 
 
+            #region roi 시각화
+            //foreach (var circle in circles)
+            //{
+            //    Point center = new Point((int)circle.Center.X, (int)circle.Center.Y);
+            //    int radius = (int)circle.Radius;
+
+            //    // 원의 중심을 빨간색 점으로 표시
+            //    Cv2.Circle(gray, center, 3, new Scalar(0, 0, 255), -1);
+
+            //    // 원의 경계를 초록색으로 그림
+            //    Cv2.Circle(gray, center, radius, new Scalar(0, 255, 0), 2);
+            //}
+            //// 결과 이미지 출력
+            //Cv2.ImShow("Detected Circles", gray);
+            //Cv2.WaitKey(0);
+            //Cv2.DestroyAllWindows();
+            #endregion
 
             // 원 검출 실패 시 종료
             if (circles.Length < 4)
@@ -211,6 +252,150 @@ namespace PixelPainter
             return result;
         }
 
+
+        private Mat DetectCirclesUsingBlobs(Mat src, Mat src2)
+        {
+            Mat gray = new Mat(); // 원본 손상 방지를 위해 새로운 Mat 사용
+            Mat result = new Mat();
+
+            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY); // 원본을 먼저 Grayscale로 변환
+
+            #region 좌우상하 원검출위해 안쪽영역 지움
+            //crack은 외곽에만 생김, 내부영역 지워버림
+            int roiWidth = src.Cols * 78 / 100;   // 전체 너비의 75%
+            int roiHeight = src.Rows * 100 / 100; // 전체 높이의 100%
+
+            int x = (src.Cols - roiWidth) / 2;
+            int y = (src.Rows - roiHeight) / 2;
+
+            Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
+            Cv2.Rectangle(gray, innerROI, new Scalar(0), -1);
+
+            roiWidth = src.Cols * 100 / 100;
+            roiHeight = src.Rows * 73 / 100;
+            x = (src.Cols - roiWidth) / 2;
+            y = (src.Rows - roiHeight) / 2;
+            innerROI = new Rect(x, y, roiWidth, roiHeight);
+            Cv2.Rectangle(gray, innerROI, new Scalar(0), -1);
+            #endregion
+
+            // 블러링 (노이즈 감소)
+            Cv2.GaussianBlur(gray, gray, new Size(5, 5), 2);
+
+            // Blob 검출 (원 중심을 찾기 위해)
+            Mat blobResult = DetectCirclesUsingBlobs(gray);  // Blob 검출 함수 호출
+
+            // 원 검출 실패 시 종료
+            if (blobResult == null)
+            {
+                Console.WriteLine("Error: 원이 검출되지 않음!");
+                return null;
+            }
+
+            // 원 중심점을 저장하고 정렬
+            List<Point2f> centers = new List<Point2f>();
+            foreach (var contour in contours)
+            {
+                Moments moments = Cv2.Moments(contour);
+                if (moments.M00 != 0)
+                {
+                    Point2f center = new Point2f((float)(moments.M10 / moments.M00), (float)(moments.M01 / moments.M00));
+                    centers.Add(center);
+                }
+            }
+
+            // 최소 4개의 원이 검출되었는지 확인
+            if (centers.Count < 4)
+            {
+                Console.WriteLine("Error: 원이 4개 검출되지 않음!");
+                return null;
+            }
+
+            Point2f[] sortedCenters = SortCenters(centers);
+
+            // 패딩 값 설정 (픽셀 단위, 필요에 따라 조정 가능)
+            int paddingX = 30; // 좌우 여유 공간
+            int paddingY = 30; // 상하 여유 공간
+
+            // 패딩을 적용한 목적지 좌표 계산 (네 방향 모두 여유 공간 추가)
+            Point2f[] dstPoints =
+            {
+                new Point2f(0 + paddingX, 0 + paddingY),  // 좌상단 (더 오른쪽, 아래쪽)
+                new Point2f(src2.Cols - 1 - paddingX, 0 + paddingY),  // 우상단 (더 왼쪽, 아래쪽)
+                new Point2f(src2.Cols - 1 - paddingX, src2.Rows - 1 - paddingY),  // 우하단 (더 왼쪽, 위쪽)
+                new Point2f(0 + paddingX, src2.Rows - 1 - paddingY)   // 좌하단 (더 오른쪽, 위쪽)
+            };
+
+            // Perspective 변환 적용
+            Mat perspectiveMatrix = Cv2.GetPerspectiveTransform(sortedCenters, dstPoints);
+            Cv2.WarpPerspective(src, result, perspectiveMatrix, new Size(src2.Cols, src2.Rows));
+
+            return result;
+        }
+
+        // 원 중심점을 좌상단, 우상단, 우하단, 좌하단 순으로 정렬
+        private Point2f[] SortCenters(List<Point2f> centers)
+        {
+            var sortedX = centers.OrderBy(p => p.X).ToArray();
+            var left = sortedX.Take(2).OrderBy(p => p.Y).ToArray();
+            var right = sortedX.Skip(2).OrderBy(p => p.Y).ToArray();
+
+            return new Point2f[]
+            {
+                left[0],   // 좌상단
+                right[0],  // 우상단
+                right[1],  // 우하단
+                left[1]    // 좌하단
+            };
+        }
+
+        private Mat DetectCirclesUsingBlobs(Mat src)
+        {
+            Mat gray = new Mat();
+            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);  // 그레이스케일 변환
+
+            // 이진화: 임계값 설정 (Threshold)
+            Mat binary = new Mat();
+            Cv2.Threshold(gray, binary, 100, 255, ThresholdTypes.Binary);  // 임계값 100, 최대값 255, 이진화
+
+            // 노이즈 제거를 위한 필터링
+            Cv2.GaussianBlur(binary, binary, new Size(5, 5), 2);
+
+            // Blob(원형 객체) 찾기 위한 컨투어(윤곽선) 추출
+            Point[][] contours;
+            HierarchyIndex[] hierarchy;
+            Cv2.FindContours(binary, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+            Mat result = src.Clone();  // 원본 이미지 복제 (결과를 그리기 위해)
+
+            // 각 컨투어에 대해
+            foreach (var contour in contours)
+            {
+                // 각 컨투어의 면적 계산
+                double area = Cv2.ContourArea(contour);
+
+                // 면적이 일정 이상인 경우에만 원으로 처리
+                if (area > 50)  // 예: 50 이상의 면적만 원으로 간주
+                {
+                    // 컨투어의 중심을 계산
+                    Moments moments = Cv2.Moments(contour);
+                    Point center = new Point((int)(moments.M10 / moments.M00), (int)(moments.M01 / moments.M00));
+
+                    // 원의 중심을 빨간 점으로 표시
+                    Cv2.Circle(result, center, 3, new Scalar(0, 0, 255), -1);
+
+                    // 원을 초록색으로 그림
+                    Cv2.DrawContours(result, new List<Point[]> { contour }, -1, new Scalar(0, 255, 0), 2);
+                }
+            }
+
+            // 결과 이미지 화면에 표시
+            Cv2.ImShow("Detected Circles", result);
+            Cv2.WaitKey(0);
+            Cv2.DestroyAllWindows();
+
+            return result;
+        }
 
         // 원 중심점을 좌상단, 우상단, 우하단, 좌하단 순으로 정렬
         private Point2f[] SortCenters(List<Point2f> centers)
