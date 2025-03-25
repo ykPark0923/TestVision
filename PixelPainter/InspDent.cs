@@ -14,7 +14,7 @@ namespace PixelPainter
 {
     public partial class InspDent : Form
     {
-        private readonly string normalImagePath = @"C:\devSJ\C#_MarchProject\PixelPainter\bin\Debug\Image.bmp";
+        private readonly string normalImagePath = @"C:\devSJ\C#_MarchProject\PixelPainter\bin\Debug\Image.bmp"; //정상 이미지 경로
         private Mat src = new Mat();
         private Mat src2 = new Mat();
         private Mat diffImage = new Mat();
@@ -89,10 +89,10 @@ namespace PixelPainter
             foreach (var contour in dentContours)
             {
                 double area = Cv2.ContourArea(contour);
-                if (area > 3)  // 일정 크기 이상의 Dent만 감지
+                if (area > 25)  // 일정 크기 이상의 Dent만 감지
                 {
                     Rect boundingBox = Cv2.BoundingRect(contour);
-                    Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 255, 255), 2); // 빨간색 박스 표시
+                    Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 255, 255), 2); // 노란색 박스 표시
                     dentDetected = true;
                 }
             }
