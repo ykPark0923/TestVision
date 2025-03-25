@@ -52,10 +52,13 @@ namespace PixelPainter
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            InspCrack editIMG = new InspCrack();
+            //InspCrack editIMG = new InspCrack();
+            InspCrack DentImg = new InspCrack();
 
             // 모달로 띄움 (ShowDialog 호출)
-            DialogResult result = editIMG.ShowDialog();
+            //DialogResult result = editIMG.ShowDialog();
+            DialogResult result = DentImg.ShowDialog();
+
         }
         private void saveFileDialog1_FileOk(object sender, CancelEventArgs e)
         {

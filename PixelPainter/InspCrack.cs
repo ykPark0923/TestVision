@@ -10,7 +10,7 @@ namespace PixelPainter
     public partial class InspCrack : Form
     {
 
-        private readonly string normalImagePath = @"Image.bmp";
+        private readonly string normalImagePath = @"C:\devSJ\C#_MarchProject\PixelPainter\bin\Debug\Image.bmp";
 
         public InspCrack()
         {
