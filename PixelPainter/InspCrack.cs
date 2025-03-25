@@ -19,16 +19,12 @@ namespace PixelPainter
             // 정상이미지를 경로로 고정
             src2 = Cv2.ImRead(normalImagePath);
             if (src2.Empty()) return;
-            
+
             pictureBox2.Image = BitmapConverter.ToBitmap(src2);
         }
 
         private Mat src = new Mat();
         private Mat src2 = new Mat();
-        private Mat temp1 = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
-        private Mat temp2 = new Mat();  //윤곽선 그리기 전 이미지를 임시저장
-        private Mat aligned1 = null;
-        private Mat aligned2 = null;
         private Mat diffImage = new Mat();
 
         private void openBTN_Click(object sender, EventArgs e)
@@ -38,13 +34,13 @@ namespace PixelPainter
                 src = Cv2.ImRead(openFileDialog1.FileName);
                 pictureBox1.Image = BitmapConverter.ToBitmap(src);
             }
-        }        
+        }
         //크랙이미지 윤곽선 그리기
         private void diffBTN_Click(object sender, EventArgs e)
         {
-            AlignAndCompare();
+            DiffCompare();
         }
-        private void AlignAndCompare()
+        private void DiffCompare()
         {
             if (src.Empty() || src2.Empty())
             {
@@ -52,317 +48,61 @@ namespace PixelPainter
                 return;
             }
 
-
-            ////이미지 윤곽선 그리기전 이미지 임시저장
-            //temp1 = src.Clone();
-            //temp2 = src2.Clone();
-
-            //// PCB 정렬
-            //aligned1 = AlignPCB(src);
-            //aligned2 = AlignPCB(src2);
-            //src = temp1.Clone();
-            //src2 = temp2.Clone();
-
-
             diffImage = new Mat();
             Cv2.Absdiff(src, src2, diffImage);
-            Cv2.ImShow("Difference", diffImage);
 
-
-
-            //// 모폴로지 diff로 crack 영역구하기
-            //Mat morp1 = new Mat();
-            //Mat morp2 = new Mat();
-
-            //Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(2, 2));
-
-            //Cv2.MorphologyEx(aligned1, morp1, MorphTypes.Close, Kernel, new Point(-1, -1), 2);
-            //Cv2.MorphologyEx(aligned2, morp2, MorphTypes.Close, Kernel, new Point(-1, -1), 2);
-
-            //Mat diffImageMorp = new Mat();
-            //Cv2.Absdiff(morp1, morp2, diffImageMorp);
-
-            //Cv2.Threshold(diffImageMorp, diffImageMorp, 150, 255, ThresholdTypes.Binary);
-
-
-
-
-            ////crack은 외곽에만 생김, 내부영역 지워버림
-            //// 이미지 크기 계산
-            //int roiWidth = diffImageMorp.Cols * 95 / 100;   // 전체 너비의 92%
-            //int roiHeight = diffImageMorp.Rows * 95 / 100;  // 전체 높이의 92%
-
-            //// 중심을 기준으로 ROI 좌표 설정
-            //int x = (diffImageMorp.Cols - roiWidth) / 2;  // 중앙 정렬 X 좌표
-            //int y = (diffImageMorp.Rows - roiHeight) / 2; // 중앙 정렬 Y 좌표
-
-            //// ROI 생성
-            //Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
-
-            //// 안쪽 영역을 검정색으로 채우기
-            //Cv2.Rectangle(diffImageMorp, innerROI, new Scalar(0), -1);
-
-
-
-            //Cv2.MorphologyEx(diffImageMorp, diffImageMorp, MorphTypes.Close, Kernel, new Point(-1, -1), 10);
-
-
-            //// diffImageMorp가 3채널 이미지인지 확인 후 단일 채널로 변환
-            //if (diffImageMorp.Channels() == 3)
-            //{
-            //    Cv2.CvtColor(diffImageMorp, diffImageMorp, ColorConversionCodes.BGR2GRAY);
-            //}
-            //// 컨투어 검출
-            //Point[][] contours;
-            //HierarchyIndex[] hierarchy;
-            //Cv2.FindContours(diffImageMorp, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-            //// 면적 필터링 (너무 큰 영역 제거)
-            //double maxAreaThreshold = 500; // 너무 큰 영역을 제거할 임계값 (값 조정 가능)
-
-            //foreach (var contour in contours)
-            //{
-            //    double area = Cv2.ContourArea(contour);
-            //    if (area > maxAreaThreshold) // 면적이 너무 크면 제거
-            //    {
-            //        Cv2.DrawContours(diffImageMorp, new Point[][] { contour }, -1, new Scalar(0), -1);
-            //    }
-            //}
-
-            //Cv2.ImShow("Filtered Diff", diffImageMorp);
-
-
-
-            ////Cv2.ImShow("diffImageMorp", diffImageMorp);
-
-            //pictureBox1.Image = BitmapConverter.ToBitmap(aligned1);
-            //pictureBox2.Image = BitmapConverter.ToBitmap(aligned2);
-
-            //// 이미지 비교 (절대차)
-            //diffImage = new Mat();
-            //Cv2.Absdiff(aligned1, aligned2, diffImage);
-            ////Cv2.ImShow("Difference", diffImage);
-            //textBox1.Text = "OK";
-
-
-
-
-
-
-
-            #region crack condition
-            //Crack 불량 판단
-            //if ((IsCrackByContour(src) || IsCrackByEdge(src)) || aligned1 == null)
-            //{
-            //    IsPCBCracked(src);
-            //    textBox1.Text = "NG: Crack";
-            //    return;
-            //}
-
-            //pictureBox1.Image = BitmapConverter.ToBitmap(aligned1);
-            //pictureBox2.Image = BitmapConverter.ToBitmap(aligned2);
-
-            //// 이미지 비교 (절대차)
-            //diffImage = new Mat();
-            //Cv2.Absdiff(aligned1, aligned2, diffImage);
-            ////Cv2.ImShow("Difference", diffImage);
-            //textBox1.Text = "OK";
-            #endregion
-
+            detectDrack();
         }
 
-
-
-        private Mat AlignPCB(Mat src)
+        private void detectDrack()
         {
-            Mat gray = new Mat();
-            Mat binary = new Mat();
-            Mat result = new Mat();
+            //crack은 외곽에만 생김, 내부영역 지워버림
+            // 이미지 크기 계산
+            int roiWidth = diffImage.Cols * 80 / 100;   // 전체 너비의 80%
+            int roiHeight = diffImage.Rows * 80 / 100;  // 전체 높이의 80%
 
-            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            // 중심을 기준으로 ROI 좌표 설정
+            int x = (diffImage.Cols - roiWidth) / 2;  // 중앙 정렬 X 좌표
+            int y = (diffImage.Rows - roiHeight) / 2; // 중앙 정렬 Y 좌표
 
-            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Triangle);
-            //Cv2.AdaptiveThreshold(gray, binary, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.BinaryInv, 11, 2);
+            // ROI 생성
+            Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
 
-            Point[][] contours;
-            HierarchyIndex[] hierarchy;
-            Cv2.FindContours(binary, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+            // 안쪽 영역을 검정색으로 채우기
+            Cv2.Rectangle(diffImage, innerROI, new Scalar(0), -1);
 
-            Point[] largestContour = contours.OrderByDescending(c => Cv2.ContourArea(c)).FirstOrDefault();
-            if (largestContour == null || Cv2.ContourArea(largestContour) < 100) return src;
+            // 그레이스케일 변환
+            Mat grayDiff = new Mat();
+            Cv2.CvtColor(diffImage, grayDiff, ColorConversionCodes.BGR2GRAY);
 
-            Point[] approx = Cv2.ApproxPolyDP(largestContour, 0.02 * Cv2.ArcLength(largestContour, true), true);
-
-            if (approx.Length != 4)
-            {
-                approx = Cv2.ConvexHull(approx);
-            }
-
-            if (approx.Length == 4)
-            {
-                Point2f[] srcPoints = OrderPoints(approx);
-                Point2f[] dstPoints =
-                {
-                    new Point2f(0, 0),
-                    new Point2f(src.Cols - 1, 0),
-                    new Point2f(src.Cols - 1, src.Rows - 1),
-                    new Point2f(0, src.Rows - 1)
-                };
-
-                Mat perspectiveMatrix = Cv2.GetPerspectiveTransform(srcPoints, dstPoints);
-                Cv2.WarpPerspective(src, result, perspectiveMatrix, src.Size());
-
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        private Point2f[] OrderPoints(Point[] points)
-        {
-            Point2f[] ordered = new Point2f[4];
-            var sortedX = points.OrderBy(p => p.X).ToArray();
-            var left = sortedX.Take(2).OrderBy(p => p.Y).ToArray();
-            var right = sortedX.Skip(2).OrderBy(p => p.Y).ToArray();
-
-            ordered[0] = left[0];
-            ordered[1] = right[0];
-            ordered[2] = right[1];
-            ordered[3] = left[1];
-
-            return ordered;
-        }
-
-
-
-
-
-
-
-
-
-
-
-        // 외곽선 둘레 정상이미지 둘레와 비교
-        private void IsPCBCracked(Mat src)
-        {
-            Mat gray = new Mat();
-            Mat binary = new Mat();
-            Mat morp = new Mat();
-            Mat image = new Mat();
-            Mat dst = src.Clone(); // 원본 이미지 복사하여 출력용으로 사용
-
-            Mat Kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(2, 2));
-            Point[][] contours;
-
-            // 1. 그레이스케일 변환
-            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
-
-            //2. 이진화 (PCB의 밝은 영역 강조)
-            //Cv2.AdaptiveThreshold(gray, binary, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.Binary, 3, 1);
-            Cv2.Threshold(gray, binary, 50, 255, ThresholdTypes.Binary);
-            //Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Triangle);
-
-            // 3. 모폴로지 연산 (잡음 제거 및 선명한 윤곽 생성)
-            Cv2.MorphologyEx(binary, morp, MorphTypes.Close, Kernel, new Point(-1, -1), 2);
-
-
-            // 5. 윤곽선 검출 (외곽선만 추출)
-            Cv2.FindContours(morp, out contours, out _, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-
-            if (contours.Length > 0)
-            {
-                // 1️면적이 가장 큰 윤곽선 찾기
-                Point[] largestContour = contours.OrderByDescending(c => Cv2.ContourArea(c)).FirstOrDefault();
-
-                // 2️윤곽선의 둘레 길이(ArcLength) 계산
-                double perimeter = Cv2.ArcLength(largestContour, true);
-                double epsilon = perimeter * 0.001; // 윤곽선을 단순화하는 정도
-
-                //Console.WriteLine("Largest Contour Perimeter : " + perimeter);
-
-                // 3️윤곽선 단순화
-                Point[] approx = Cv2.ApproxPolyDP(largestContour, epsilon, true);
-
-                Cv2.DrawContours(dst, new Point[][] { approx }, -1, new Scalar(0, 0, 255), 2, LineTypes.AntiAlias);
-                pictureBox1.Image = BitmapConverter.ToBitmap(dst);
-            }
-        }
-
-        //수평, 수직 2개 직선보다 적으면 크랙
-        private bool IsCrackByEdge(Mat src)
-        {
-            Mat gray = new Mat();
-            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
-
-            Cv2.GaussianBlur(gray, gray, new Size(5, 5), 1.5); // 노이즈 제거
-
-            Mat edge = new Mat();
-            Cv2.Canny(gray, edge, 100, 200);
-            //Cv2.ImShow("edge", edge);
-
-            LineSegmentPoint[] lines = Cv2.HoughLinesP(edge, 0.5, Math.PI / 180, 80, 100, 10);
-
-            //Console.WriteLine("line"+lines.Length);
-
-            // 방향별로 필터링
-            int horizontal = 0;
-            int vertical = 0;
-
-            foreach (var line in lines)
-            {
-                double dx = line.P2.X - line.P1.X;
-                double dy = line.P2.Y - line.P1.Y;
-                double angle = Math.Atan2(dy, dx) * 180.0 / Math.PI;
-
-                double length = Math.Sqrt(dx * dx + dy * dy);
-                if (length < 100) continue; // 짧은 선 무시
-
-                // 수평 또는 수직으로 간주 (허용 각도 오차 ±10도)
-                if (Math.Abs(angle) < 10 || Math.Abs(angle) > 170)
-                    horizontal++;
-                else if (Math.Abs(angle - 90) < 10 || Math.Abs(angle + 90) < 10)
-                    vertical++;
-            }
-
-            //Console.WriteLine("horizontal" + horizontal);
-            //Console.WriteLine("vertical" + vertical);
-
-            // 수평 2개 + 수직 2개 이상이어야 정상
-            return (horizontal < 2 || vertical < 2); // 부족하면 Crack
-        }
-
-        //꼭짓점 4개 아니면 크랙
-        private bool IsCrackByContour(Mat src)
-        {
-            Mat gray = new Mat();
-            Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
-            Cv2.GaussianBlur(gray, gray, new Size(5, 5), 1.5);
-
-            Mat binary = new Mat();
-            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Triangle);
-            //Cv2.ImShow("binary", binary);
+            // 이진화 (Threshold 적용)
+            Mat binaryDiff = new Mat();
+            Cv2.Threshold(grayDiff, binaryDiff, 50, 255, ThresholdTypes.Binary);
 
             // 윤곽선 검출
-            Point[][] contours;
+            Point[][] CrackContours;
             HierarchyIndex[] hierarchy;
-            Cv2.FindContours(binary, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+            Cv2.FindContours(binaryDiff, out CrackContours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
-            if (contours.Length == 0) return true; // 윤곽 없으면 crack
+            bool crackDetected = false;
+            Mat resultImage = src.Clone();
 
-            var largest = contours.OrderByDescending(c => Cv2.ContourArea(c)).First();
-            double arcLen = Cv2.ArcLength(largest, true);
-            Point[] approx = Cv2.ApproxPolyDP(largest, 0.02 * arcLen, true);
+            foreach (var contour in CrackContours)
+            {
+                double area = Cv2.ContourArea(contour);
+                if (area > 5)  // 일정 크기 이상만 감지
+                {
+                    Rect boundingBox = Cv2.BoundingRect(contour);
+                    Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 0, 255), 2); // 빨간색 박스 그리기
+                    crackDetected = true;
+                }
+            }
 
-            // 디버깅용 윤곽선 보기
-            //Mat debug = src.Clone();
-            //Cv2.DrawContours(debug, new[] { approx }, -1, Scalar.Red, 2);
-            //Cv2.ImShow("Contour", debug);
+            // 결과 표시
+            pictureBox1.Image = BitmapConverter.ToBitmap(resultImage);
 
-            // 핵심 판단: 꼭짓점 4개면 정상, 아니면 crack
-            return approx.Length != 4;
+            // 크랙이 감지되었다면 NG 처리
+            textBox1.Text = crackDetected ? "NG: Crack" : "OK";
         }
     }
 }
