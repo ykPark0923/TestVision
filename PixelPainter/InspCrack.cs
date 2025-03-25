@@ -24,6 +24,8 @@ namespace PixelPainter
 
         private Mat src = new Mat();
         private Mat src2 = new Mat();
+        private Mat aligned1 = new Mat();
+        private Mat aligned2 = new Mat();
         private Mat diffImage = new Mat();
 
         private void openBTN_Click(object sender, EventArgs e)
@@ -34,13 +36,11 @@ namespace PixelPainter
                 pictureBox1.Image = BitmapConverter.ToBitmap(src);
             }
         }
-
         // 크랙 이미지 윤곽선 그리기
         private void diffBTN_Click(object sender, EventArgs e)
         {
             DiffCompare();
         }
-
         private void DiffCompare()
         {
             if (src.Empty() || src2.Empty())
@@ -54,8 +54,8 @@ namespace PixelPainter
             Mat temp2 = src2.Clone();
 
             // PCB 정렬 (각 이미지에 대해 DetectCirclesUsingBlobs 호출)
-            Mat aligned1 = DetectCirclesUsingBlobs(src, src2);
-            Mat aligned2 = DetectCirclesUsingBlobs(src2, src2);
+            aligned1 = PCBAlign(src, src2);
+            aligned2 = PCBAlign(src2, src2);
 
             if (aligned1 != null && aligned2 != null)
             {
@@ -69,10 +69,17 @@ namespace PixelPainter
 
             diffImage = new Mat();
             Cv2.Absdiff(aligned1, aligned2, diffImage);
-            //Cv2.Threshold(diffImage, diffImage, 200, 255, ThresholdTypes.Binary);
-            Cv2.ImShow("diffImage", diffImage);
-        }
+            //Cv2.Threshold(diffImage, diffImage, 180, 255, ThresholdTypes.Binary);
+            //Cv2.ImShow("diffImage", diffImage);
+            //detectCrack(diffImage);
 
+
+            Mat subImage = new Mat();
+            Cv2.Subtract(aligned2, aligned1, subImage);
+            //Cv2.ImShow("subImage", subImage);
+
+            detectCrack(subImage);
+        }
         private void alignBTN_Click(object sender, EventArgs e)
         {
             Mat temp1 = src.Clone();
@@ -87,8 +94,8 @@ namespace PixelPainter
             }
 
             // PCB 정렬
-            aligned1 = DetectCirclesUsingBlobs(src, src2);
-            aligned2 = DetectCirclesUsingBlobs(src2, src2);
+            aligned1 = PCBAlign(src, src2);
+            aligned2 = PCBAlign(src2, src2);
 
             if (aligned1 != null && aligned2 != null)
             {
@@ -102,8 +109,7 @@ namespace PixelPainter
                 Console.WriteLine("align 미검.");
             }
         }
-
-        private Mat DetectCirclesUsingBlobs(Mat src, Mat src2)
+        private Mat PCBAlign(Mat src, Mat src2)
         {
             Mat gray = new Mat();
             Mat result = new Mat();
@@ -180,7 +186,58 @@ namespace PixelPainter
 
             return result;
         }
+        private void detectCrack(Mat src)
+        {
+            Mat subImage = src;
+            //crack은 외곽에만 생김, 내부영역 지워버림
+            // 이미지 크기 계산
+            int roiWidth = subImage.Cols * 90 / 100;   // 전체 너비의 80%
+            int roiHeight = subImage.Rows * 90 / 100;  // 전체 높이의 80%
 
+            // 중심을 기준으로 ROI 좌표 설정
+            int x = (subImage.Cols - roiWidth) / 2;  // 중앙 정렬 X 좌표
+            int y = (subImage.Rows - roiHeight) / 2; // 중앙 정렬 Y 좌표
+
+            // ROI 생성
+            Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
+
+            // 안쪽 영역을 검정색으로 채우기
+            Cv2.Rectangle(subImage, innerROI, new Scalar(0), -1);
+
+            // 그레이스케일 변환
+            Mat grayDiff = new Mat();
+            Cv2.CvtColor(subImage, grayDiff, ColorConversionCodes.BGR2GRAY);
+
+            // 이진화 (Threshold 적용)
+            Mat binaryDiff = new Mat();
+            Cv2.Threshold(grayDiff, binaryDiff, 50, 255, ThresholdTypes.Binary);
+            //Cv2.ImShow("binaryDiff", binaryDiff);
+
+            // 윤곽선 검출
+            Point[][] contours;
+            HierarchyIndex[] hierarchy;
+            Cv2.FindContours(binaryDiff, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+
+            bool crackDetected = false;
+            Mat resultImage = aligned1.Clone();
+
+            foreach (var contour in contours)
+            {
+                double area = Cv2.ContourArea(contour);
+                if (area > 5)  // 일정 크기 이상만 감지
+                {
+                    Rect boundingBox = Cv2.BoundingRect(contour);
+                    Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 100, 255), 2); // 주황 박스 그리기
+                    crackDetected = true;
+                }
+            }
+
+            // 결과 표시
+            pictureBox1.Image = BitmapConverter.ToBitmap(resultImage);
+
+            // 크랙이 감지되었다면 NG 처리
+            textBox1.Text = crackDetected ? "NG: Crack" : "OK";
+        }
         // 전달된 4개의 중심점을 좌상단, 우상단, 우하단, 좌하단 순으로 정렬
         private Point2f[] SortCenters(List<Point2f> centers)
         {
