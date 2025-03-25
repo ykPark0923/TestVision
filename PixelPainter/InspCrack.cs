@@ -51,10 +51,10 @@ namespace PixelPainter
             diffImage = new Mat();
             Cv2.Absdiff(src, src2, diffImage);
 
-            detectDrack();
+            detectCrack();
         }
 
-        private void detectDrack()
+        private void detectCrack()
         {
             //crack은 외곽에만 생김, 내부영역 지워버림
             // 이미지 크기 계산
