@@ -45,35 +45,6 @@ namespace PixelPainter
         {
             DiffCompare();
         }
-        private void alignBTN_Click(object sender, EventArgs e)
-        {
-            Mat temp1 = src.Clone();
-            Mat temp2 = src2.Clone();
-            Mat aligned1 = null;
-            Mat aligned2 = null;
-
-            if (src.Empty() || src2.Empty())
-            {
-                Console.WriteLine("이미지를 먼저 로드하세요.");
-                return;
-            }
-
-            // PCB 정렬
-            aligned1 = PCBAlign(src, src2);
-            aligned2 = PCBAlign(src2, src2);
-
-            if (aligned1 != null && aligned2 != null)
-            {
-                Cv2.ImShow("align1", aligned1);
-                Cv2.ImShow("align2", aligned2);
-                src = temp1.Clone();
-                src2 = temp2.Clone();
-            }
-            else
-            {
-                Console.WriteLine("align 미검.");
-            }
-        }
         private void DiffCompare()
         {
             if (src.Empty() || src2.Empty())
@@ -292,7 +263,5 @@ namespace PixelPainter
 
             return new Point2f(x, y);
         }
-
-
     }
 }

@@ -36,7 +36,6 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.diffBTN = new System.Windows.Forms.Button();
-            this.alignBTN = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -94,28 +93,17 @@
             this.diffBTN.UseVisualStyleBackColor = true;
             this.diffBTN.Click += new System.EventHandler(this.diffBTN_Click);
             // 
-            // alignBTN
-            // 
-            this.alignBTN.Location = new System.Drawing.Point(349, 584);
-            this.alignBTN.Name = "alignBTN";
-            this.alignBTN.Size = new System.Drawing.Size(74, 32);
-            this.alignBTN.TabIndex = 11;
-            this.alignBTN.Text = "align";
-            this.alignBTN.UseVisualStyleBackColor = true;
-            this.alignBTN.Click += new System.EventHandler(this.alignBTN_Click);
-            // 
-            // InspAffine
+            // InspCrack
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1369, 752);
-            this.Controls.Add(this.alignBTN);
             this.Controls.Add(this.diffBTN);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.openBTN1);
             this.Controls.Add(this.pictureBox1);
-            this.Name = "InspAffine";
+            this.Name = "InspCrack";
             this.Text = "editIMG";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
@@ -134,6 +122,5 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.Button diffBTN;
-        private System.Windows.Forms.Button alignBTN;
     }
 }
