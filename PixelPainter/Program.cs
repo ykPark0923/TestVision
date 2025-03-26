@@ -21,11 +21,11 @@ namespace PixelPainter
             Form1 mainForm = new Form1();
 
             //// Form1이 실행된 후, editIMG를 모달로 띄운다.
-            InspCrack editImageForm = new InspCrack();
+            Inspsoot editImageForm = new Inspsoot();
             //editImageForm.ShowDialog();  // 모달 형식으로 띄우기
 
             //Application.Run(new Form1());
-            Application.Run(new InspCrack());
+            Application.Run(new Inspsoot());
         }
     }
 }
