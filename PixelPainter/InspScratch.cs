@@ -16,6 +16,12 @@ namespace PixelPainter
         {
             InitializeComponent();
 
+            // TextBox에 초기값 설정
+            txtareaMin.Text = "10";       // 최소 면적 초기값
+            txtareaMax.Text = "600";      // 최대 면적 초기값
+            txtminAspectRatio.Text = "2"; // 최소 비율 초기값
+            txtmaxAspectRatio.Text = "25"; // 최대 비율 초기값
+
             // 정상 이미지를 로드하여 src2 변수에 저장
             src2 = Cv2.ImRead(normalImagePath);
             // 이미지를 제대로 로드하지 못했다면 종료
@@ -49,17 +55,8 @@ namespace PixelPainter
             // 이미지를 비교하는 메서드 호출
             DiffCompare();
         }
-
-        // 두 이미지를 비교하는 메서드
         private void DiffCompare()
         {
-            // 이미지가 제대로 로드되지 않으면 오류 메시지 출력 후 종료
-            if (src.Empty() || src2.Empty())
-            {
-                Console.WriteLine("이미지를 먼저 로드하세요.");
-                return;
-            }
-
             // 두 이미지의 차이를 계산하여 diffImage에 저장
             diffImage = new Mat();
             Cv2.Absdiff(src, src2, diffImage);
@@ -68,75 +65,68 @@ namespace PixelPainter
             detectScratch();
         }
 
-        // 스크래치를 탐지하는 메서드
         private void detectScratch()
         {
-            // 이미지 크기 계산
-            int roiWidth = diffImage.Cols * 80 / 100;   // 전체 너비의 80%
-            int roiHeight = diffImage.Rows * 80 / 100;  // 전체 높이의 80%
+            // TextBox에서 면적 및 비율 값을 읽어옵니다.
+            int minArea = int.Parse(txtareaMin.Text);   // 최소 면적
+            int maxArea = int.Parse(txtareaMax.Text);   // 최대 면적
+            float minAspectRatio = float.Parse(txtminAspectRatio.Text); // 최소 비율
+            float maxAspectRatio = float.Parse(txtmaxAspectRatio.Text); // 최대 비율
 
-            // 중심을 기준으로 ROI (Region of Interest, 관심 영역) 좌표 설정
-            int x = (diffImage.Cols - roiWidth) / 2;  // 중앙 정렬 X 좌표
-            int y = (diffImage.Rows - roiHeight) / 2; // 중앙 정렬 Y 좌표
+            int roiWidth = diffImage.Cols * 80 / 100;
+            int roiHeight = diffImage.Rows * 80 / 100;
 
-            // ROI 객체 생성 (스크래치를 탐지할 영역)
+            int x = (diffImage.Cols - roiWidth) / 2;
+            int y = (diffImage.Rows - roiHeight) / 2;
+
             Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
 
-            // 안쪽 영역만 잘라낸 이미지를 생성
             Mat roiImage = new Mat(diffImage, innerROI);
 
-            // 그레이스케일 변환 (이진화 및 윤곽선 검출을 위한 전처리)
             Mat grayDiff = new Mat();
             Cv2.CvtColor(roiImage, grayDiff, ColorConversionCodes.BGR2GRAY);
 
-            // 이진화 (Threshold 적용하여 차이 이미지를 흑백으로 변환)
             Mat binaryDiff = new Mat();
             Cv2.Threshold(grayDiff, binaryDiff, 50, 255, ThresholdTypes.Binary);
 
-            // 윤곽선 검출 (차이 이미지에서 물체의 경계를 찾음)
+            pictureBox2.Image = BitmapConverter.ToBitmap(binaryDiff);
+
+            Mat kernel = new Mat(5, 5, MatType.CV_8U, Scalar.All(30));
+
+            Mat closedDiff = new Mat();
+            Cv2.MorphologyEx(binaryDiff, closedDiff, MorphTypes.Close, kernel);
+
+            pictureBox3.Image = BitmapConverter.ToBitmap(closedDiff);
+
             Point[][] contours;
             HierarchyIndex[] hierarchy;
-            Cv2.FindContours(binaryDiff, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+            Cv2.FindContours(closedDiff, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
-            bool scratchDetected = false;  // 스크래치 여부를 추적할 변수
-            Mat resultImage = src.Clone();  // 결과를 저장할 이미지 (원본 이미지의 복사본)
+            bool scratchDetected = false;
+            Mat resultImage = src.Clone();
 
-            // 검출된 모든 윤곽선에 대해 반복
             foreach (var contour in contours)
             {
-                // 각 윤곽선의 면적 계산
                 double area = Cv2.ContourArea(contour);
-                // 면적이 너무 작거나 너무 큰 윤곽선은 제외
-                if (area > 10 && area < 500)
+                if (area >= minArea && area <= maxArea)  // 면적 조건 수정
                 {
-                    // 윤곽선의 경계를 직선 형태로 만드는 최소 영역을 계산 (스크래치 형태가 직선일 것이라 가정)
                     RotatedRect box = Cv2.MinAreaRect(contour);
-                    // 직사각형의 가로 세로 비율 계산
                     float aspectRatio = Math.Max(box.Size.Width, box.Size.Height) / Math.Min(box.Size.Width, box.Size.Height);
 
-                    // 직선 같은 형태만 스크래치로 판단하기 위해 비율 범위 설정
-                    float minAspectRatio = 3;  // 최소 비율 (예: 길이가 너비보다 3배 이상)
-                    float maxAspectRatio = 10;  // 최대 비율 (예: 길이가 너비보다 10배 이하)
-
-                    // 비율이 지정 범위 내에 있을 경우에만 스크래치로 판단
-                    if (aspectRatio >= minAspectRatio && aspectRatio <= maxAspectRatio)
+                    if (aspectRatio >= minAspectRatio && aspectRatio <= maxAspectRatio)  // 비율 조건 수정
                     {
-                        // ROI 영역 내에서 좌표를 실제 이미지 좌표로 변환
                         Rect boundingBox = Cv2.BoundingRect(contour);
-                        boundingBox.X += x;  // ROI의 X 좌표를 더하여 실제 이미지 좌표로 변환
-                        boundingBox.Y += y;  // ROI의 Y 좌표를 더하여 실제 이미지 좌표로 변환
+                        boundingBox.X += x;
+                        boundingBox.Y += y;
 
-                        // 결과 이미지에 스크래치 부분에 파란색 박스 그리기
-                        Cv2.Rectangle(resultImage, boundingBox, new Scalar(255, 0, 0), 2);
-                        scratchDetected = true;  // 스크래치가 감지되었음을 표시
+                        Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 0, 255), 2);
+                        scratchDetected = true;
                     }
                 }
             }
 
-            // 결과 이미지를 pictureBox1에 표시
             pictureBox1.Image = BitmapConverter.ToBitmap(resultImage);
 
-            // 스크래치가 감지되었으면 "NG: Scratch" 표시, 아니면 "OK"
             textBox1.Text = scratchDetected ? "NG: Scratch" : "OK";
         }
     }

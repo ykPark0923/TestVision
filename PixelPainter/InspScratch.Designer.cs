@@ -34,8 +34,20 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.diffBTN = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.txtareaMin = new System.Windows.Forms.TextBox();
+            this.txtareaMax = new System.Windows.Forms.TextBox();
+            this.txtminAspectRatio = new System.Windows.Forms.TextBox();
+            this.txtmaxAspectRatio = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -87,11 +99,113 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // pictureBox3
+            // 
+            this.pictureBox3.Location = new System.Drawing.Point(1166, 12);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(571, 550);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox3.TabIndex = 12;
+            this.pictureBox3.TabStop = false;
+            // 
+            // txtareaMin
+            // 
+            this.txtareaMin.Location = new System.Drawing.Point(131, 620);
+            this.txtareaMin.Name = "txtareaMin";
+            this.txtareaMin.Size = new System.Drawing.Size(100, 28);
+            this.txtareaMin.TabIndex = 13;
+            // 
+            // txtareaMax
+            // 
+            this.txtareaMax.Location = new System.Drawing.Point(287, 620);
+            this.txtareaMax.Name = "txtareaMax";
+            this.txtareaMax.Size = new System.Drawing.Size(100, 28);
+            this.txtareaMax.TabIndex = 14;
+            // 
+            // txtminAspectRatio
+            // 
+            this.txtminAspectRatio.Location = new System.Drawing.Point(131, 675);
+            this.txtminAspectRatio.Name = "txtminAspectRatio";
+            this.txtminAspectRatio.Size = new System.Drawing.Size(100, 28);
+            this.txtminAspectRatio.TabIndex = 15;
+            // 
+            // txtmaxAspectRatio
+            // 
+            this.txtmaxAspectRatio.Location = new System.Drawing.Point(287, 675);
+            this.txtmaxAspectRatio.Name = "txtmaxAspectRatio";
+            this.txtmaxAspectRatio.Size = new System.Drawing.Size(100, 28);
+            this.txtmaxAspectRatio.TabIndex = 16;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(32, 630);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(44, 18);
+            this.label1.TabIndex = 17;
+            this.label1.Text = "면적";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(32, 685);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(44, 18);
+            this.label2.TabIndex = 18;
+            this.label2.Text = "비율";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(89, 630);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(36, 18);
+            this.label3.TabIndex = 19;
+            this.label3.Text = "min";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(89, 685);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(36, 18);
+            this.label4.TabIndex = 20;
+            this.label4.Text = "min";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(238, 630);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(43, 18);
+            this.label5.TabIndex = 21;
+            this.label5.Text = "max";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(238, 685);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(43, 18);
+            this.label6.TabIndex = 22;
+            this.label6.Text = "max";
+            // 
             // InspScratch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1369, 752);
+            this.ClientSize = new System.Drawing.Size(1800, 752);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtmaxAspectRatio);
+            this.Controls.Add(this.txtminAspectRatio);
+            this.Controls.Add(this.txtareaMax);
+            this.Controls.Add(this.txtareaMin);
+            this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.diffBTN);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.openBTN);
@@ -101,6 +215,7 @@
             this.Text = "InspScratch";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -114,5 +229,16 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button diffBTN;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.TextBox txtareaMin;
+        private System.Windows.Forms.TextBox txtareaMax;
+        private System.Windows.Forms.TextBox txtminAspectRatio;
+        private System.Windows.Forms.TextBox txtmaxAspectRatio;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }
