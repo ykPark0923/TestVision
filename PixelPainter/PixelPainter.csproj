@@ -115,6 +115,9 @@
     <Compile Include="InspDent.Designer.cs">
       <DependentUpon>InspDent.cs</DependentUpon>
     </Compile>
+    <Compile Include="InspScratch.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="InspSoot.cs">
       <SubType>Form</SubType>
     </Compile>
