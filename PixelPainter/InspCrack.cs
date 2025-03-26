@@ -27,8 +27,7 @@ namespace PixelPainter
         private Mat aligned1 = new Mat();
         private Mat aligned2 = new Mat();
         private Mat diffImage = new Mat();
-
-        private Point2f[] persOffset = new Point2f[4];  //ROI좌상좌표
+        private Mat inversePerspectiveMatrix = new Mat();
 
         private float min = 100;
         private float max = 5000;
@@ -179,25 +178,8 @@ namespace PixelPainter
             };
 
             Mat perspectiveMatrix = Cv2.GetPerspectiveTransform(sortedCenters, dstPoints);
-            Mat inversePerspectiveMatrix = perspectiveMatrix.Inv();
+            inversePerspectiveMatrix = perspectiveMatrix.Inv();
             Cv2.WarpPerspective(src, result, perspectiveMatrix, new Size(src2.Cols, src2.Rows));
-
-
-
-            // 1. 역변환으로 원본 좌표 계산 (각 점에 대해 역변환 수행)
-            Point2f[] originalPoints = new Point2f[4];
-            for (int i = 0; i < 4; i++)
-            {
-                // 역변환된 좌표 구하기
-                originalPoints[i] = perspectiveInverseTransform(sortedCenters[i], inversePerspectiveMatrix);
-            }
-
-            // 원본 좌표를 기준으로 각 변환된 점의 오프셋 계산
-            Point2f[] persOffsets = new Point2f[4];
-            for (int i = 0; i < 4; i++)
-            {
-                persOffsets[i] = sortedCenters[i] - originalPoints[i];
-            }
 
             return result;
         }
@@ -242,10 +224,17 @@ namespace PixelPainter
                 if (area >= min && area<=max)  // 일정 크기 이상만 감지
                 {
                     Rect boundingBox = Cv2.BoundingRect(contour);
-                    // boundingBox의 좌상단 좌표를 persPoint의 시작 좌표로 조정
+
+                    // boundingBox의 좌상단 좌표 (시작 좌표)
+                    Point2f topLeft = new Point2f(boundingBox.X, boundingBox.Y);
+
+                    // 역변환하여 원본 좌표를 계산
+                    Point2f originalTopLeft = perspectiveInverseTransform(topLeft, inversePerspectiveMatrix);
+
+                    // boundingBox의 좌상단 좌표를 계산된 원본 좌표로 보정
                     Rect boundingBoxWithOffset = new Rect(
-                        (int)(boundingBox.X + persOffset[0].X),
-                        (int)(boundingBox.Y + persOffset[0].Y),
+                        (int)(boundingBox.X + (originalTopLeft.X - topLeft.X)),
+                        (int)(boundingBox.Y + (originalTopLeft.Y - topLeft.Y)),
                         boundingBox.Width,
                         boundingBox.Height
                     );
@@ -280,7 +269,6 @@ namespace PixelPainter
                 left[1]    // 좌하단
             };
         }
-
         private Point2f perspectiveInverseTransform(Point2f point, Mat inverseMatrix)
         {
             // Homogeneous 좌표로 변환 (3x1 크기의 행렬로 설정)
