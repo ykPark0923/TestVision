@@ -89,7 +89,6 @@ C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\bin\x64\Debu
 C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\bin\x64\Debug\System.Runtime.CompilerServices.Unsafe.xml
 C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\bin\x64\Debug\System.ValueTuple.xml
 C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.csproj.AssemblyReference.cache
-C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.InspCrack.resources
 C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.Form1.resources
 C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\obj\x64\Debug\PixelPainter.InspScratch.resources
 C:\Users\user\Desktop\머신비전 PC기반\TestVision\PixelPainter\obj\x64\Debug\Oh1.Properties.Resources.resources

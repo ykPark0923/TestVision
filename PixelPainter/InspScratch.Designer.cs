@@ -30,11 +30,10 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.openBTN = new System.Windows.Forms.Button();
+            this.openBTN1 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.diffBTN = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.txtareaMin = new System.Windows.Forms.TextBox();
             this.txtareaMax = new System.Windows.Forms.TextBox();
             this.txtminAspectRatio = new System.Windows.Forms.TextBox();
@@ -47,12 +46,11 @@
             this.label6 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(12, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(11, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(571, 550);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -68,15 +66,15 @@
             this.pictureBox2.TabIndex = 2;
             this.pictureBox2.TabStop = false;
             // 
-            // openBTN
+            // openBTN1
             // 
-            this.openBTN.Location = new System.Drawing.Point(12, 568);
-            this.openBTN.Name = "openBTN";
-            this.openBTN.Size = new System.Drawing.Size(74, 32);
-            this.openBTN.TabIndex = 3;
-            this.openBTN.Text = "열기";
-            this.openBTN.UseVisualStyleBackColor = true;
-            this.openBTN.Click += new System.EventHandler(this.openBTN_Click);
+            this.openBTN1.Location = new System.Drawing.Point(12, 568);
+            this.openBTN1.Name = "openBTN1";
+            this.openBTN1.Size = new System.Drawing.Size(74, 32);
+            this.openBTN1.TabIndex = 3;
+            this.openBTN1.Text = "열기";
+            this.openBTN1.UseVisualStyleBackColor = true;
+            this.openBTN1.Click += new System.EventHandler(this.openBTN_Click);
             // 
             // textBox1
             // 
@@ -98,15 +96,6 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.Location = new System.Drawing.Point(1166, 12);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(571, 550);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox3.TabIndex = 12;
-            this.pictureBox3.TabStop = false;
             // 
             // txtareaMin
             // 
@@ -194,7 +183,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1800, 752);
+            this.ClientSize = new System.Drawing.Size(1369, 752);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -205,17 +194,15 @@
             this.Controls.Add(this.txtminAspectRatio);
             this.Controls.Add(this.txtareaMax);
             this.Controls.Add(this.txtareaMin);
-            this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.diffBTN);
             this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.openBTN);
+            this.Controls.Add(this.openBTN1);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
             this.Name = "InspScratch";
-            this.Text = "InspScratch";
+            this.Text = "editIMG";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -225,11 +212,10 @@
 
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.Button openBTN;
+        private System.Windows.Forms.Button openBTN1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button diffBTN;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.TextBox txtareaMin;
         private System.Windows.Forms.TextBox txtareaMax;
         private System.Windows.Forms.TextBox txtminAspectRatio;

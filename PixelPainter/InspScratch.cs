@@ -55,6 +55,8 @@ namespace PixelPainter
             // 이미지를 비교하는 메서드 호출
             DiffCompare();
         }
+
+        // 두 이미지 간 차이를 비교하여 스크래치를 감지하는 메서드
         private void DiffCompare()
         {
             // 두 이미지의 차이를 계산하여 diffImage에 저장
@@ -65,6 +67,7 @@ namespace PixelPainter
             detectScratch();
         }
 
+        // 스크래치를 탐지하는 함수
         private void detectScratch()
         {
             // TextBox에서 면적 및 비율 값을 읽어옵니다.
@@ -73,60 +76,74 @@ namespace PixelPainter
             float minAspectRatio = float.Parse(txtminAspectRatio.Text); // 최소 비율
             float maxAspectRatio = float.Parse(txtmaxAspectRatio.Text); // 최대 비율
 
+            // 비교할 영역을 설정 (80% 영역을 사용)
             int roiWidth = diffImage.Cols * 80 / 100;
             int roiHeight = diffImage.Rows * 80 / 100;
 
+            // 비교할 영역의 좌표를 설정 (중앙에 배치)
             int x = (diffImage.Cols - roiWidth) / 2;
             int y = (diffImage.Rows - roiHeight) / 2;
 
             Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
 
+            // 해당 영역만큼 자르기
             Mat roiImage = new Mat(diffImage, innerROI);
 
+            // 그레이스케일 변환
             Mat grayDiff = new Mat();
             Cv2.CvtColor(roiImage, grayDiff, ColorConversionCodes.BGR2GRAY);
 
+            // 이진화 (Thresholding)
             Mat binaryDiff = new Mat();
             Cv2.Threshold(grayDiff, binaryDiff, 50, 255, ThresholdTypes.Binary);
 
-            pictureBox2.Image = BitmapConverter.ToBitmap(binaryDiff);
+            // 여기서 pictureBox2에 이미지를 표시하지 않음
+            // pictureBox2.Image = BitmapConverter.ToBitmap(binaryDiff); // 이 코드는 제거됨
 
+            // 커널을 사용한 형태학적 연산 (닫기 연산)
             Mat kernel = new Mat(5, 5, MatType.CV_8U, Scalar.All(30));
-
             Mat closedDiff = new Mat();
             Cv2.MorphologyEx(binaryDiff, closedDiff, MorphTypes.Close, kernel);
 
-            pictureBox3.Image = BitmapConverter.ToBitmap(closedDiff);
-
+            // 외부 윤곽선 찾기
             Point[][] contours;
             HierarchyIndex[] hierarchy;
             Cv2.FindContours(closedDiff, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
+            // 스크래치 발견 여부를 기록
             bool scratchDetected = false;
+            // 결과 이미지를 복사 (원본 이미지를 수정하지 않음)
             Mat resultImage = src.Clone();
 
+            // 모든 윤곽선에 대해 반복
             foreach (var contour in contours)
             {
+                // 윤곽선의 면적 계산
                 double area = Cv2.ContourArea(contour);
-                if (area >= minArea && area <= maxArea)  // 면적 조건 수정
+                if (area >= minArea && area <= maxArea)  // 면적 조건 확인
                 {
+                    // 윤곽선의 최소 면적 직사각형 찾기
                     RotatedRect box = Cv2.MinAreaRect(contour);
                     float aspectRatio = Math.Max(box.Size.Width, box.Size.Height) / Math.Min(box.Size.Width, box.Size.Height);
 
-                    if (aspectRatio >= minAspectRatio && aspectRatio <= maxAspectRatio)  // 비율 조건 수정
+                    if (aspectRatio >= minAspectRatio && aspectRatio <= maxAspectRatio)  // 비율 조건 확인
                     {
+                        // 해당 윤곽선의 바운딩 박스를 그리기
                         Rect boundingBox = Cv2.BoundingRect(contour);
                         boundingBox.X += x;
                         boundingBox.Y += y;
 
+                        // 결과 이미지에 빨간색 사각형 그리기
                         Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 0, 255), 2);
                         scratchDetected = true;
                     }
                 }
             }
 
+            // 결과 이미지만 pictureBox1에 표시
             pictureBox1.Image = BitmapConverter.ToBitmap(resultImage);
 
+            // 결과에 따른 텍스트 출력 (스크래치 발견 시 "NG: Scratch", 아니면 "OK")
             textBox1.Text = scratchDetected ? "NG: Scratch" : "OK";
         }
     }
