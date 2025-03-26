@@ -27,7 +27,11 @@ namespace PixelPainter
         private Mat aligned1 = new Mat();
         private Mat aligned2 = new Mat();
         private Mat diffImage = new Mat();
-        private Point2f persPoint = new Point2f();  //ROI좌상좌표
+
+        private Point2f[] persOffset = new Point2f[4];  //ROI좌상좌표
+
+        private float min = 100;
+        private float max = 5000;
 
         private void openBTN_Click(object sender, EventArgs e)
         {
@@ -71,8 +75,6 @@ namespace PixelPainter
                 Console.WriteLine("align 미검.");
             }
         }
-
-
         private void DiffCompare()
         {
             if (src.Empty() || src2.Empty())
@@ -91,8 +93,8 @@ namespace PixelPainter
 
             if (aligned1 != null && aligned2 != null)
             {
-                //src = temp1.Clone();
-                //src2 = temp2.Clone();
+                src = temp1.Clone();
+                src2 = temp2.Clone();
             }
             else
             {
@@ -176,12 +178,26 @@ namespace PixelPainter
                 new Point2f(paddingX, src2.Rows - 1 - paddingY)
             };
 
-            //좌상자표
-            persPoint = sortedCenters[0] - dstPoints[0];
-            //Console.WriteLine("perspoint" + persPoint);
-
             Mat perspectiveMatrix = Cv2.GetPerspectiveTransform(sortedCenters, dstPoints);
+            Mat inversePerspectiveMatrix = perspectiveMatrix.Inv();
             Cv2.WarpPerspective(src, result, perspectiveMatrix, new Size(src2.Cols, src2.Rows));
+
+
+
+            // 1. 역변환으로 원본 좌표 계산 (각 점에 대해 역변환 수행)
+            Point2f[] originalPoints = new Point2f[4];
+            for (int i = 0; i < 4; i++)
+            {
+                // 역변환된 좌표 구하기
+                originalPoints[i] = perspectiveInverseTransform(sortedCenters[i], inversePerspectiveMatrix);
+            }
+
+            // 원본 좌표를 기준으로 각 변환된 점의 오프셋 계산
+            Point2f[] persOffsets = new Point2f[4];
+            for (int i = 0; i < 4; i++)
+            {
+                persOffsets[i] = sortedCenters[i] - originalPoints[i];
+            }
 
             return result;
         }
@@ -223,13 +239,13 @@ namespace PixelPainter
             foreach (var contour in contours)
             {
                 double area = Cv2.ContourArea(contour);
-                if (area > 100)  // 일정 크기 이상만 감지
+                if (area >= min && area<=max)  // 일정 크기 이상만 감지
                 {
                     Rect boundingBox = Cv2.BoundingRect(contour);
                     // boundingBox의 좌상단 좌표를 persPoint의 시작 좌표로 조정
                     Rect boundingBoxWithOffset = new Rect(
-                        (int)(boundingBox.X + persPoint.X),
-                        (int)(boundingBox.Y + persPoint.Y),
+                        (int)(boundingBox.X + persOffset[0].X),
+                        (int)(boundingBox.Y + persOffset[0].Y),
                         boundingBox.Width,
                         boundingBox.Height
                     );
@@ -264,5 +280,31 @@ namespace PixelPainter
                 left[1]    // 좌하단
             };
         }
+
+        private Point2f perspectiveInverseTransform(Point2f point, Mat inverseMatrix)
+        {
+            // Homogeneous 좌표로 변환 (3x1 크기의 행렬로 설정)
+            Mat homogenousPoint = new Mat(3, 1, MatType.CV_32F);
+            homogenousPoint.Set<float>(0, 0, point.X);
+            homogenousPoint.Set<float>(1, 0, point.Y);
+            homogenousPoint.Set<float>(2, 0, 1); // 동차 좌표로 변환
+
+            // inverseMatrix와 homogenousPoint의 데이터 타입을 맞추기 위해 변환 (CV_32F)
+            if (inverseMatrix.Type() != MatType.CV_32F)
+            {
+                inverseMatrix.ConvertTo(inverseMatrix, MatType.CV_32F);
+            }
+
+            // 행렬 곱셈: 역변환 행렬을 적용
+            Mat transformedPoint = inverseMatrix * homogenousPoint; // 행렬 곱셈
+
+            // 역변환 후 좌표
+            float x = transformedPoint.Get<float>(0, 0) / transformedPoint.Get<float>(2, 0);
+            float y = transformedPoint.Get<float>(1, 0) / transformedPoint.Get<float>(2, 0);
+
+            return new Point2f(x, y);
+        }
+
+
     }
 }
