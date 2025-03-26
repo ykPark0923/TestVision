@@ -32,7 +32,7 @@ namespace PixelPainter
             src2 = Cv2.ImRead(normalImagePath);
             if (src2.Empty()) return;
 
-            pbOK.Image = BitmapConverter.ToBitmap(src2);
+            pictureBox2.Image = BitmapConverter.ToBitmap(src2);
         }
 
 
@@ -41,7 +41,7 @@ namespace PixelPainter
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 src = Cv2.ImRead(openFileDialog1.FileName);
-                pbNG.Image = BitmapConverter.ToBitmap(src);
+                pictureBox1.Image = BitmapConverter.ToBitmap(src);
             }
         }
 
@@ -58,269 +58,56 @@ namespace PixelPainter
                 return;
             }
 
-            //// 1️⃣ 정상 이미지와 검사 이미지의 차이 계산
-            //diffImage = new Mat();
-            //Cv2.Absdiff(src, src2, diffImage);
+            // 1️⃣ 정상 이미지와 검사 이미지의 차이 계산
+            diffImage = new Mat();
+            Cv2.Absdiff(src, src2, diffImage);
 
-            //// 2️⃣ 그레이스케일 변환
-            //Mat grayDiff = new Mat();
-            //Cv2.CvtColor(diffImage, grayDiff, ColorConversionCodes.BGR2GRAY);
+            // 2️⃣ 그레이스케일 변환
+            Mat grayDiff = new Mat();
+            Cv2.CvtColor(diffImage, grayDiff, ColorConversionCodes.BGR2GRAY);
 
-            //// 3️⃣ 이진화 (Dent 부분만 강조)
-            //Mat binaryDiff = new Mat();
-            //Cv2.Threshold(grayDiff, binaryDiff, 30, 255, ThresholdTypes.Binary); // Dent가 흰색으로 남음
+            // 3️⃣ 이진화 (Dent 부분만 강조)
+            Mat binaryDiff = new Mat();
+            Cv2.Threshold(grayDiff, binaryDiff, 30, 255, ThresholdTypes.Binary); // Dent가 흰색으로 남음
 
-            //// 4️⃣ 외곽 영역 제거 (중심부만 남김)
-            //int roiWidth = diffImage.Cols * 86 / 100;   // 중심 너비 (86%)
-            //int roiHeight = diffImage.Rows * 79 / 100;  // 중심 높이 (79%)
-            //int x = (diffImage.Cols - roiWidth) / 2;
-            //int y = (diffImage.Rows - roiHeight) / 2;
-            //Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
-
-            //// 외곽을 검정색으로 덮기 (중심만 남김)
-            //Mat mask = Mat.Zeros(binaryDiff.Size(), MatType.CV_8UC1);
-            //Cv2.Rectangle(mask, innerROI, new Scalar(255), -1); // 중심을 흰색으로 유지
-            //Cv2.BitwiseAnd(binaryDiff, mask, binaryDiff); // 중심 부분만 유지
-
-            //// 5️⃣ 윤곽선 검출 → Dent 영역 찾기
-            //OpenCvSharp.Point[][] dentContours;
-            //HierarchyIndex[] hierarchy;
-            //Cv2.FindContours(binaryDiff, out dentContours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-            //bool dentDetected = false;
-            //Mat resultImage = src.Clone();
-
-            //foreach (var contour in dentContours)
-            //{
-            //    double area = Cv2.ContourArea(contour);
-            //    if (area >= minDentArea && area <= maxDentArea)  // 일정 크기 이상의 Dent만 감지
-            //    {
-            //        Rect boundingBox = Cv2.BoundingRect(contour);
-            //        Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 255, 255), 2); // 노란색 박스 표시
-            //        dentDetected = true;
-            //    }
-            //}
-
-            //// 6️⃣ 결과 표시
-            //pbNG.Image = BitmapConverter.ToBitmap(resultImage);
-
-            //// Dent 검출 여부 출력
-            //txtResult.Text = dentDetected ? "NG: Dent Detected" : "OK";
-
-            //soot**************************
-
-            //외곽 선 빼곤 잘 나옴
-
-            //Mat gray1 = new Mat();
-            //Mat gray2 = new Mat();
-            //Cv2.CvtColor(src, gray1, ColorConversionCodes.BGR2GRAY);
-            //Cv2.CvtColor(src2, gray2, ColorConversionCodes.BGR2GRAY);
-
-            //// 2. 블러 적용하여 노이즈 제거
-            //Cv2.GaussianBlur(gray1, gray1, new Size(5, 5), 0);
-            //Cv2.GaussianBlur(gray2, gray2, new Size(5, 5), 0);
-
-            //// 3. 밝기 증가 부분 강조 (Soot 검출)
-            //Mat diffImage = new Mat();
-            //Cv2.Subtract(gray2, gray1, diffImage); // 밝아진 부분 강조
-
-            //// 4. 밝아진 부분(Soot)만 강조 (Threshold 적용)
-            //Mat sootMask = new Mat();
-            //Cv2.Threshold(diffImage, sootMask, 30, 255, ThresholdTypes.Binary);
-
-            //// 5. 배경(어두운 부분) 제거 (PCB의 검정색 배경 제외)
-            //Mat bgMask = new Mat();
-            //Cv2.Threshold(gray1, bgMask, 50, 255, ThresholdTypes.BinaryInv);
-
-            //// 6. PCB 외곽 4개 꼭짓점의 구멍 제거
-            //Rect[] excludeRegions = {
-            //    new Rect(0, 0, 50, 50), // 좌상단
-            //    new Rect(gray1.Cols - 50, 0, 50, 50), // 우상단
-            //    new Rect(0, gray1.Rows - 50, 50, 50), // 좌하단
-            //    new Rect(gray1.Cols - 50, gray1.Rows - 50, 50, 50) // 우하단
-            //};
-            //foreach (var rect in excludeRegions)
-            //{
-            //    Cv2.Rectangle(bgMask, rect, new Scalar(0), -1); // 해당 영역을 0으로 설정하여 제거
-            //}
-
-            //// 7. 최종 Soot 검출 결과
-            //Mat finalMask = new Mat();
-            //Cv2.BitwiseAnd(sootMask, bgMask, finalMask);
-
-            //// 8. 윤곽선 검출
-            //Point[][] contours;
-            //HierarchyIndex[] hierarchy;
-            //Cv2.FindContours(finalMask, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-            //List<Rect> boundingBoxes = new List<Rect>();
-            //foreach (var contour in contours)
-            //{
-            //    double area = Cv2.ContourArea(contour);
-            //    if (area > 30) // 작은 노이즈 무시
-            //    {
-            //        boundingBoxes.Add(Cv2.BoundingRect(contour));
-            //    }
-            //}
-
-            //// 9. 가까운 영역 병합
-            //List<Rect> mergedBoxes = MergeBoundingBoxes(boundingBoxes, 100);
-
-            //// 10. 결과 표시
-            //Mat resultImage = src.Clone();
-            //foreach (var box in mergedBoxes)
-            //{
-            //    Cv2.Rectangle(resultImage, box, new Scalar(0, 0, 255), 2);
-            //}
-
-            //pbNG.Image = BitmapConverter.ToBitmap(resultImage);
-
-
-            //외곽 선 제외 시도, 작은 soot 추출
-            Mat gray1 = new Mat();
-            Mat gray2 = new Mat();
-            Cv2.CvtColor(src, gray1, ColorConversionCodes.BGR2GRAY);
-            Cv2.CvtColor(src2, gray2, ColorConversionCodes.BGR2GRAY);
-
-            // 1. 히스토그램 균등화: 이미지를 균등화하여 대비를 개선
-            Cv2.EqualizeHist(gray1, gray1);
-            Cv2.EqualizeHist(gray2, gray2);
-
-            // 2. 블러 적용하여 노이즈 제거
-            Cv2.GaussianBlur(gray1, gray1, new Size(5, 5), 0);
-            Cv2.GaussianBlur(gray2, gray2, new Size(5, 5), 0);
-
-            // 3. 밝기 증가 부분 강조 (Soot 검출)
-            Mat diffImage = new Mat();
-            Cv2.Subtract(gray2, gray1, diffImage); // 밝아진 부분 강조
-
-            // 4. 연한 Soot도 잡을 수 있게 임계값을 낮추어 적용
-            Mat sootMask = new Mat();
-            Cv2.Threshold(diffImage, sootMask, 10, 255, ThresholdTypes.Binary); // 10으로 낮춰서 연한 soot도 잡기
-
-            // 5. Soot와 배경의 경계를 분명히 하기 위해 Canny 엣지 검출 적용
-            Mat edges = new Mat();
-            Cv2.Canny(sootMask, edges, 100, 200);
-
-            // 6. 배경(어두운 부분) 제거 (PCB의 검정색 배경 제외)
-            Mat bgMask = new Mat();
-            Cv2.Threshold(gray1, bgMask, 37, 255, ThresholdTypes.BinaryInv);
-
-            // 7. 중심 부분만 남기기 (외곽 영역 제거)
-            int roiWidth = diffImage.Cols * 80 / 100;   // 중심 너비 (80%)
+            // 4️⃣ 외곽 영역 제거 (중심부만 남김)
+            int roiWidth = diffImage.Cols * 86 / 100;   // 중심 너비 (86%)
             int roiHeight = diffImage.Rows * 79 / 100;  // 중심 높이 (79%)
             int x = (diffImage.Cols - roiWidth) / 2;
             int y = (diffImage.Rows - roiHeight) / 2;
             Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
 
-            // 외곽을 제거하기 위해 mask 생성
-            Mat mask = Mat.Zeros(sootMask.Size(), MatType.CV_8UC1); // sootMask 크기로 마스크 생성
-            Cv2.Rectangle(mask, innerROI, new Scalar(255), -1); // 중심 영역을 흰색으로 유지
+            // 외곽을 검정색으로 덮기 (중심만 남김)
+            Mat mask = Mat.Zeros(binaryDiff.Size(), MatType.CV_8UC1);
+            Cv2.Rectangle(mask, innerROI, new Scalar(255), -1); // 중심을 흰색으로 유지
+            Cv2.BitwiseAnd(binaryDiff, mask, binaryDiff); // 중심 부분만 유지
 
-            // 8. 중심 부분만 남기고 외곽은 제거
-            Cv2.BitwiseAnd(sootMask, mask, sootMask); // 최종 Soot 영역에서 외곽을 제거
-
-            // 9. 최종 Soot 검출 결과
-            Mat finalMask = new Mat();
-            Cv2.BitwiseAnd(sootMask, bgMask, finalMask);
-
-            // 10. 윤곽선 검출
-            Point[][] contours;
+            // 5️⃣ 윤곽선 검출 → Dent 영역 찾기
+            OpenCvSharp.Point[][] dentContours;
             HierarchyIndex[] hierarchy;
-            Cv2.FindContours(finalMask, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+            Cv2.FindContours(binaryDiff, out dentContours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
-            List<Rect> boundingBoxes = new List<Rect>();
-            foreach (var contour in contours)
+            bool dentDetected = false;
+            Mat resultImage = src.Clone();
+
+            foreach (var contour in dentContours)
             {
                 double area = Cv2.ContourArea(contour);
-                if (area > 4) // 작은 노이즈 무시
+                if (area >= minDentArea && area <= maxDentArea)  // 일정 크기 이상의 Dent만 감지
                 {
-                    boundingBoxes.Add(Cv2.BoundingRect(contour));
+                    Rect boundingBox = Cv2.BoundingRect(contour);
+                    Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 255, 255), 2); // 노란색 박스 표시
+                    dentDetected = true;
                 }
             }
 
-            // 11. 가까운 영역 병합
-            List<Rect> mergedBoxes = MergeBoundingBoxes(boundingBoxes, 100);
+            // 6️⃣ 결과 표시
+            pictureBox1.Image = BitmapConverter.ToBitmap(resultImage);
 
-            // 12. 결과 표시
-            Mat resultImage = src.Clone();
-            foreach (var box in mergedBoxes)
-            {
-                Cv2.Rectangle(resultImage, box, new Scalar(0, 0, 255), 2); // 빨간색 박스 표시
-            }
+            // Dent 검출 여부 출력
+            txtBox1.Text = dentDetected ? "NG: Dent Detected" : "OK";
 
-            pbNG.Image = BitmapConverter.ToBitmap(resultImage);
-
-
-
-        }
-
-        public List<Rect> MergeBoundingBoxes(List<Rect> boxes, int threshold, int minArea = 50)
-        {
-            if (boxes.Count == 0)
-                return new List<Rect>();
-
-            List<Rect> mergedBoxes = new List<Rect>(boxes);
-            bool merged;
-
-            do
-            {
-                merged = false;
-                List<Rect> newBoxes = new List<Rect>();
-
-                while (mergedBoxes.Count > 0)
-                {
-                    Rect current = mergedBoxes[0];
-                    mergedBoxes.RemoveAt(0);
-
-                    for (int i = 0; i < mergedBoxes.Count; i++)
-                    {
-                        if (IsClose(current, mergedBoxes[i], threshold))
-                        {
-                            // 두 박스를 병합
-                            current = UnionRect(current, mergedBoxes[i]);
-                            mergedBoxes.RemoveAt(i);
-                            merged = true;
-                            i--; // 리스트 크기가 줄어들므로 인덱스 조정
-                        }
-                    }
-
-                    // 최소 크기 기준을 만족하는 박스만 추가
-                    if (current.Width * current.Height >= minArea)
-                    {
-                        newBoxes.Add(current);
-                    }
-                }
-
-                mergedBoxes = newBoxes;
-            } while (merged); // 더 이상 병합이 발생하지 않을 때까지 반복
-
-            return mergedBoxes;
-        }
-
-        // 두 바운딩 박스가 가까운지 판단하는 함수 (중심점 거리 기준)
-        private bool IsClose(Rect box1, Rect box2, int threshold)
-        {
-            int centerX1 = box1.X + box1.Width / 2;
-            int centerY1 = box1.Y + box1.Height / 2;
-            int centerX2 = box2.X + box2.Width / 2;
-            int centerY2 = box2.Y + box2.Height / 2;
-
-            double distance = Math.Sqrt(Math.Pow(centerX1 - centerX2, 2) + Math.Pow(centerY1 - centerY2, 2));
-
-            return distance < threshold;
-        }
-
-        // 두 박스를 병합하는 함수
-        private Rect UnionRect(Rect box1, Rect box2)
-        {
-            int x = Math.Min(box1.X, box2.X);
-            int y = Math.Min(box1.Y, box2.Y);
-            int width = Math.Max(box1.X + box1.Width, box2.X + box2.Width) - x;
-            int height = Math.Max(box1.Y + box1.Height, box2.Y + box2.Height) - y;
-
-            return new Rect(x, y, width, height);
-        }
+        }   
 
 
     }

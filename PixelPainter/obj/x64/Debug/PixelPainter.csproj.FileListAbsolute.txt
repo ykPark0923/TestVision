@@ -98,3 +98,4 @@ C:\devSJ\C#_MarchProject\PixelPainter\obj\x64\Debug\PixelPai.F2372F17.Up2Date
 C:\devSJ\C#_MarchProject\PixelPainter\obj\x64\Debug\Oh1.exe
 C:\devSJ\C#_MarchProject\PixelPainter\obj\x64\Debug\Oh1.pdb
 C:\devSJ\C#_MarchProject\PixelPainter\obj\x64\Debug\PixelPainter.InspDent.resources
+C:\devSJ\C#_MarchProject\PixelPainter\obj\x64\Debug\PixelPainter.InspSoot.resources

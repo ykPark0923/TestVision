@@ -1,6 +1,6 @@
 ﻿namespace PixelPainter
 {
-    partial class InspDent
+    partial class InspSoot
     {
         /// <summary>
         /// Required designer variable.
@@ -52,59 +52,57 @@
             // 
             this.pictureBox1.Location = new System.Drawing.Point(12, 12);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(454, 445);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.Size = new System.Drawing.Size(461, 432);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(482, 12);
+            this.pictureBox2.Location = new System.Drawing.Point(490, 12);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(454, 445);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.Size = new System.Drawing.Size(461, 432);
             this.pictureBox2.TabIndex = 1;
             this.pictureBox2.TabStop = false;
             // 
             // openBTN1
             // 
-            this.openBTN1.Location = new System.Drawing.Point(990, 423);
+            this.openBTN1.Location = new System.Drawing.Point(1024, 468);
             this.openBTN1.Name = "openBTN1";
-            this.openBTN1.Size = new System.Drawing.Size(104, 34);
+            this.openBTN1.Size = new System.Drawing.Size(94, 37);
             this.openBTN1.TabIndex = 2;
             this.openBTN1.Text = "열기";
             this.openBTN1.UseVisualStyleBackColor = true;
-            this.openBTN1.Click += new System.EventHandler(this.btnOpen_Click);
+            this.openBTN1.Click += new System.EventHandler(this.openBTN1_Click);
             // 
             // diffBTN
             // 
-            this.diffBTN.Location = new System.Drawing.Point(990, 491);
+            this.diffBTN.Location = new System.Drawing.Point(1024, 525);
             this.diffBTN.Name = "diffBTN";
-            this.diffBTN.Size = new System.Drawing.Size(101, 36);
+            this.diffBTN.Size = new System.Drawing.Size(94, 37);
             this.diffBTN.TabIndex = 3;
             this.diffBTN.Text = "검사";
             this.diffBTN.UseVisualStyleBackColor = true;
-            this.diffBTN.Click += new System.EventHandler(this.btnDifference_Click);
+            this.diffBTN.Click += new System.EventHandler(this.diffBTN_Click);
             // 
             // txtBox1
             // 
-            this.txtBox1.Location = new System.Drawing.Point(735, 499);
+            this.txtBox1.Location = new System.Drawing.Point(733, 531);
             this.txtBox1.Name = "txtBox1";
-            this.txtBox1.Size = new System.Drawing.Size(201, 28);
+            this.txtBox1.Size = new System.Drawing.Size(218, 28);
             this.txtBox1.TabIndex = 4;
             // 
-            // InspDent
+            // InspSoot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1125, 574);
+            this.ClientSize = new System.Drawing.Size(1171, 615);
             this.Controls.Add(this.txtBox1);
             this.Controls.Add(this.diffBTN);
             this.Controls.Add(this.openBTN1);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
-            this.Name = "InspDent";
-            this.Text = "DentIMG";
+            this.Name = "InspSoot";
+            this.Text = "SootIMG";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
