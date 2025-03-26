@@ -42,27 +42,30 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(11, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(8, 8);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(519, 550);
+            this.pictureBox1.Size = new System.Drawing.Size(363, 367);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(527, 12);
+            this.pictureBox2.Location = new System.Drawing.Point(394, 8);
+            this.pictureBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(527, 550);
+            this.pictureBox2.Size = new System.Drawing.Size(369, 367);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox2.TabIndex = 1;
             this.pictureBox2.TabStop = false;
             // 
             // openBTN
             // 
-            this.openBTN.Location = new System.Drawing.Point(181, 592);
+            this.openBTN.Location = new System.Drawing.Point(127, 395);
+            this.openBTN.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.openBTN.Name = "openBTN";
-            this.openBTN.Size = new System.Drawing.Size(74, 32);
+            this.openBTN.Size = new System.Drawing.Size(52, 21);
             this.openBTN.TabIndex = 2;
             this.openBTN.Text = "열기";
             this.openBTN.UseVisualStyleBackColor = true;
@@ -74,9 +77,10 @@
             // 
             // openBTN2
             // 
-            this.openBTN2.Location = new System.Drawing.Point(763, 606);
+            this.openBTN2.Location = new System.Drawing.Point(534, 404);
+            this.openBTN2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.openBTN2.Name = "openBTN2";
-            this.openBTN2.Size = new System.Drawing.Size(74, 32);
+            this.openBTN2.Size = new System.Drawing.Size(52, 21);
             this.openBTN2.TabIndex = 5;
             this.openBTN2.Text = "열기";
             this.openBTN2.UseVisualStyleBackColor = true;
@@ -88,25 +92,27 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(1171, 416);
+            this.button1.Location = new System.Drawing.Point(820, 277);
+            this.button1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(74, 32);
+            this.button1.Size = new System.Drawing.Size(52, 21);
             this.button1.TabIndex = 6;
             this.button1.Text = "검사";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // editIMG
+            // InspCrack
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1310, 752);
+            this.ClientSize = new System.Drawing.Size(965, 548);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.openBTN2);
             this.Controls.Add(this.openBTN);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
-            this.Name = "editIMG";
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Name = "InspCrack";
             this.Text = "editIMG";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();

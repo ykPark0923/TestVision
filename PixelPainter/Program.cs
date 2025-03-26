@@ -21,10 +21,13 @@ namespace PixelPainter
             Form1 mainForm = new Form1();
 
             //// Form1이 실행된 후, editIMG를 모달로 띄운다.
-            Inspsoot editImageForm = new Inspsoot();
+            InspCrack editImageForm = new InspCrack();
+            //DentImg추가
+            Inspsoot inspDentForm = new Inspsoot();
             //editImageForm.ShowDialog();  // 모달 형식으로 띄우기
 
             //Application.Run(new Form1());
+            //Application.Run(new InspCrack()); 주석처리 안하면 Crack, Dent가 차례로 뜸
             Application.Run(new Inspsoot());
         }
     }
