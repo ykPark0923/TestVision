@@ -27,6 +27,7 @@ namespace PixelPainter
         private Mat aligned1 = new Mat();
         private Mat aligned2 = new Mat();
         private Mat diffImage = new Mat();
+        private Point2f persPoint = new Point2f();  //ROI좌상좌표
 
         private void openBTN_Click(object sender, EventArgs e)
         {
@@ -40,45 +41,6 @@ namespace PixelPainter
         private void diffBTN_Click(object sender, EventArgs e)
         {
             DiffCompare();
-        }
-        private void DiffCompare()
-        {
-            if (src.Empty() || src2.Empty())
-            {
-                Console.WriteLine("이미지를 먼저 로드하세요.");
-                return;
-            }
-
-            // 이미지 윤곽선 그리기 전 임시 저장
-            Mat temp1 = src.Clone();
-            Mat temp2 = src2.Clone();
-
-            // PCB 정렬 (각 이미지에 대해 DetectCirclesUsingBlobs 호출)
-            aligned1 = PCBAlign(src, src2);
-            aligned2 = PCBAlign(src2, src2);
-
-            if (aligned1 != null && aligned2 != null)
-            {
-                src = temp1.Clone();
-                src2 = temp2.Clone();
-            }
-            else
-            {
-                Console.WriteLine("align 미검.");
-            }
-
-            diffImage = new Mat();
-            Cv2.Absdiff(aligned1, aligned2, diffImage);
-            //Cv2.Threshold(diffImage, diffImage, 180, 255, ThresholdTypes.Binary);
-            //Cv2.ImShow("diffImage", diffImage);
-            //detectCrack(diffImage);
-
-
-            Mat subImage = new Mat();
-            Cv2.Subtract(aligned2, aligned1, subImage);
-            //Cv2.ImShow("subImage", subImage);
-
-            detectCrack(subImage);
         }
         private void alignBTN_Click(object sender, EventArgs e)
         {
@@ -108,6 +70,39 @@ namespace PixelPainter
             {
                 Console.WriteLine("align 미검.");
             }
+        }
+
+
+        private void DiffCompare()
+        {
+            if (src.Empty() || src2.Empty())
+            {
+                Console.WriteLine("이미지를 먼저 로드하세요.");
+                return;
+            }
+
+            // 이미지 윤곽선 그리기 전 임시 저장
+            Mat temp1 = src.Clone();
+            Mat temp2 = src2.Clone();
+
+            // PCB 정렬 (각 이미지에 대해 DetectCirclesUsingBlobs 호출)
+            aligned1 = PCBAlign(src, src2);
+            aligned2 = PCBAlign(src2, src2);
+
+            if (aligned1 != null && aligned2 != null)
+            {
+                //src = temp1.Clone();
+                //src2 = temp2.Clone();
+            }
+            else
+            {
+                Console.WriteLine("align 미검.");
+            }
+
+            diffImage = new Mat();
+            Cv2.Absdiff(aligned1, aligned2, diffImage);
+            //Cv2.ImShow("diffImage", diffImage);
+            detectCrack(diffImage);
         }
         private Mat PCBAlign(Mat src, Mat src2)
         {
@@ -181,32 +176,36 @@ namespace PixelPainter
                 new Point2f(paddingX, src2.Rows - 1 - paddingY)
             };
 
+            //좌상자표
+            persPoint = sortedCenters[0] - dstPoints[0];
+            //Console.WriteLine("perspoint" + persPoint);
+
             Mat perspectiveMatrix = Cv2.GetPerspectiveTransform(sortedCenters, dstPoints);
             Cv2.WarpPerspective(src, result, perspectiveMatrix, new Size(src2.Cols, src2.Rows));
 
             return result;
         }
-        private void detectCrack(Mat src)
+        private void detectCrack(Mat sourceImage)
         {
-            Mat subImage = src;
+            Mat diffImage = sourceImage;
             //crack은 외곽에만 생김, 내부영역 지워버림
             // 이미지 크기 계산
-            int roiWidth = subImage.Cols * 90 / 100;   // 전체 너비의 80%
-            int roiHeight = subImage.Rows * 90 / 100;  // 전체 높이의 80%
+            int roiWidth = diffImage.Cols * 90 / 100;   // 전체 너비의 80%
+            int roiHeight = diffImage.Rows * 90 / 100;  // 전체 높이의 80%
 
             // 중심을 기준으로 ROI 좌표 설정
-            int x = (subImage.Cols - roiWidth) / 2;  // 중앙 정렬 X 좌표
-            int y = (subImage.Rows - roiHeight) / 2; // 중앙 정렬 Y 좌표
+            int x = (diffImage.Cols - roiWidth) / 2;  // 중앙 정렬 X 좌표
+            int y = (diffImage.Rows - roiHeight) / 2; // 중앙 정렬 Y 좌표
 
             // ROI 생성
             Rect innerROI = new Rect(x, y, roiWidth, roiHeight);
 
             // 안쪽 영역을 검정색으로 채우기
-            Cv2.Rectangle(subImage, innerROI, new Scalar(0), -1);
+            Cv2.Rectangle(diffImage, innerROI, new Scalar(0), -1);
 
             // 그레이스케일 변환
             Mat grayDiff = new Mat();
-            Cv2.CvtColor(subImage, grayDiff, ColorConversionCodes.BGR2GRAY);
+            Cv2.CvtColor(diffImage, grayDiff, ColorConversionCodes.BGR2GRAY);
 
             // 이진화 (Threshold 적용)
             Mat binaryDiff = new Mat();
@@ -219,15 +218,24 @@ namespace PixelPainter
             Cv2.FindContours(binaryDiff, out contours, out hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
             bool crackDetected = false;
-            Mat resultImage = aligned1.Clone();
+            Mat resultImage = src.Clone();
 
             foreach (var contour in contours)
             {
                 double area = Cv2.ContourArea(contour);
-                if (area > 5)  // 일정 크기 이상만 감지
+                if (area > 100)  // 일정 크기 이상만 감지
                 {
                     Rect boundingBox = Cv2.BoundingRect(contour);
-                    Cv2.Rectangle(resultImage, boundingBox, new Scalar(0, 100, 255), 2); // 주황 박스 그리기
+                    // boundingBox의 좌상단 좌표를 persPoint의 시작 좌표로 조정
+                    Rect boundingBoxWithOffset = new Rect(
+                        (int)(boundingBox.X + persPoint.X),
+                        (int)(boundingBox.Y + persPoint.Y),
+                        boundingBox.Width,
+                        boundingBox.Height
+                    );
+
+                    // 원본 이미지에 사각형 그리기
+                    Cv2.Rectangle(resultImage, boundingBoxWithOffset, new Scalar(0, 100, 255), 2);  // 주황 박스 그리기
                     crackDetected = true;
                 }
             }
