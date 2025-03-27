@@ -18,7 +18,7 @@ namespace PixelPainter
             Application.SetCompatibleTextRenderingDefault(false);
 
             // Form1을 먼저 실행
-            Form1 mainForm = new Form1();
+            //Form1 mainForm = new Form1();
 
             //// Form1이 실행된 후, editIMG를 모달로 띄운다.
             InspCrack editImageForm = new InspCrack();

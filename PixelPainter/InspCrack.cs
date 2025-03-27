@@ -59,6 +59,7 @@ namespace PixelPainter
 
             // PCB 정렬 (각 이미지에 대해 DetectCirclesUsingBlobs 호출)
             aligned1 = PCBAlign(src, src2);
+            Cv2.ImShow("aligned1", aligned1);
             aligned2 = PCBAlign(src2, src2);
 
             if (aligned1 != null && aligned2 != null)
@@ -73,19 +74,20 @@ namespace PixelPainter
 
             diffImage = new Mat();
             Cv2.Absdiff(aligned1, aligned2, diffImage);
-            //Cv2.ImShow("diffImage", diffImage);
+            Cv2.ImShow("diffImage", diffImage);
             detectCrack(diffImage);
         }
         private Mat PCBAlign(Mat src, Mat src2)
         {
             Mat gray = new Mat();
+            Mat binary = new Mat();
             Mat result = new Mat();
 
             // 1) 그레이스케일 변환
             Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
 
             #region 좌우상하 원검출을 위해 안쪽영역 지움
-            int roiWidth = src.Cols * 75 / 100;
+            int roiWidth = src.Cols * 70 / 100;
             int roiHeight = src.Rows * 100 / 100;
             int x = (src.Cols - roiWidth) / 2;
             int y = (src.Rows - roiHeight) / 2;
@@ -93,7 +95,7 @@ namespace PixelPainter
             Cv2.Rectangle(gray, innerROI, new Scalar(0), -1);
 
             roiWidth = src.Cols * 100 / 100;
-            roiHeight = src.Rows * 70 / 100;
+            roiHeight = src.Rows * 65 / 100;
             x = (src.Cols - roiWidth) / 2;
             y = (src.Rows - roiHeight) / 2;
             innerROI = new Rect(x, y, roiWidth, roiHeight);
@@ -101,12 +103,13 @@ namespace PixelPainter
             #endregion
 
             // 2) 이진화 (Threshold)
-            Cv2.Threshold(gray, gray, 30, 255, ThresholdTypes.Binary);
+            Cv2.Threshold(gray, binary, 30, 255, ThresholdTypes.Binary);
+            //Cv2.ImShow("binary", gray);
 
             // 3) 윤곽선(contour) 탐색
             Point[][] contours;
             HierarchyIndex[] hierarchy;
-            Cv2.FindContours(gray, out contours, out hierarchy,
+            Cv2.FindContours(binary, out contours, out hierarchy,
                              RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
 
             // 4) 면적 기준으로 컨투어 정렬 (내림차순: 가장 큰 면적부터)
